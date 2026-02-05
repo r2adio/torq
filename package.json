@@ -1,0 +1,22 @@
+{
+  "name": "torq",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.ts",
+    "dev": "node --watch src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/bencode": "^2.0.4",
+    "@types/node": "^25.2.1",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "bencode": "^4.0.0"
+  }
+}
