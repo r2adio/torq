@@ -1,0 +1,5 @@
+#+title: Common terms in Torrent and Torrent Client
+
+* Torrent
+
+* Announce URL/ Tracker URL

@@ -1,20 +1,19 @@
 {
   "name": "torq",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "module": "src/index.ts",
   "type": "module",
+  "private": true,
   "scripts": {
-    "start": "node src/index.ts",
-    "dev": "node --watch src/index.ts"
+    "build": "bun build src/index.ts --outdir=dist",
+    "dev": "bun run --hot src/index.ts",
+    "test": "bun test"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@types/bencode": "^2.0.4",
-    "@types/node": "^25.2.1",
-    "typescript": "^5.9.3"
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   },
   "dependencies": {
     "bencode": "^4.0.0"

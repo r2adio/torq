@@ -6,7 +6,7 @@ import bencode from "bencode";
 
 // we don't decode as 'utf-8' here because torrent files contain raw binary
 // data (like info hashes) that would be corrupted if forced into a string.
-const data = bencode.decode(fs.readFileSync("puppy.torrent"));
+const data = bencode.decode(fs.readFileSync("sample.torrent"));
 
 // helper function to convert Uint8Array (Buffer) to string
 const bytesToString = (b: Uint8Array): string =>
