@@ -1,10 +1,10 @@
-function decodeBencode(bencoded: string): string[] {
+function decodeBencode(bencoded: string): string[] | number {
   const result: string[] = [];
   let index = 0;
   while (index < bencoded.length) {
     const remaining = bencoded.slice(index);
+    // bencoded string format is <length>:<data>
     if (remaining[0] && remaining[0] >= "0" && remaining[0] <= "9") {
-      // it's a string, format is <length>:<string>
       const colonPos = bencoded.indexOf(":", index);
       if (colonPos === -1) {
         throw new Error("Invalid bencoded string: missing ':'");
@@ -15,6 +15,19 @@ function decodeBencode(bencoded: string): string[] {
       const data = bencoded.slice(start, end);
       result.push(data);
       index = end; // move past the string
+
+      // bencoded integer format is i<integer>e
+    } else if (remaining[0] === "i") {
+      const endPos = bencoded.indexOf("e", index);
+      if (endPos === -1) {
+        throw new Error("Invalid bencoded string: missing 'e' for integer");
+      }
+      const numStr = bencoded.slice(index + 1, endPos);
+      const num = parseInt(numStr, 10);
+      if (isNaN(num)) {
+        throw new Error(`Invalid integer value: '${numStr}'`);
+      }
+      return num; // return the integer value
     } else {
       throw new Error(
         `Invalid bencoded string: unexpected character '${remaining[0]}' at position ${index}`,
