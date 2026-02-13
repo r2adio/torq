@@ -1,43 +1,87 @@
-function decodeBencode(bencoded: string): string[] | number {
-  const result: string[] = [];
-  let index = 0;
-  while (index < bencoded.length) {
-    const remaining = bencoded.slice(index);
-    // bencoded string format is <length>:<data>
-    if (remaining[0] && remaining[0] >= "0" && remaining[0] <= "9") {
-      const colonPos = bencoded.indexOf(":", index);
-      if (colonPos === -1) {
-        throw new Error("Invalid bencoded string: missing ':'");
-      }
-      const len = parseInt(bencoded.slice(index, colonPos), 10);
-      const start = colonPos + 1;
-      const end = start + len;
-      const data = bencoded.slice(start, end);
-      result.push(data);
-      index = end; // move past the string
+function detectType(bencoded: string, index: number): string {
+  if (index >= bencoded.length) return "empty";
 
-      // bencoded integer format is i<integer>e
-    } else if (remaining[0] === "i") {
-      const endPos = bencoded.indexOf("e", index);
-      if (endPos === -1) {
-        throw new Error("Invalid bencoded string: missing 'e' for integer");
-      }
-      const numStr = bencoded.slice(index + 1, endPos);
-      const num = parseInt(numStr, 10);
-      if (isNaN(num)) {
-        throw new Error(`Invalid integer value: '${numStr}'`);
-      }
-      return num; // return the integer value
-    } else {
-      throw new Error(
-        `Invalid bencoded string: unexpected character '${remaining[0]}' at position ${index}`,
-      );
-    }
+  const char = bencoded[index];
+  if (char === undefined) return "empty";
+  // check for bencoded integer format: i<integer>e
+  if (char === "i") return "integer";
+  // check for bencoded string format: <length>:<data>
+  if (char >= "0" && char <= "9") return "string";
+  // check for bencoded list format: l<elements>e
+  if (char === "l") return "list";
+  // check for bencoded dictionary format: d<key><value>e
+  if (char === "d") return "dictionary";
+
+  return "Invalid bencoded format.";
+}
+
+function decodeString(bencoded: string, index: number): [string, number] {
+  const colonIndex = bencoded.indexOf(":", index);
+  if (colonIndex === -1) {
+    throw new Error("Invalid bencoded string format: missing colon");
+  }
+  const lenStr = bencoded.substring(index, colonIndex);
+  const length = parseInt(lenStr, 10);
+  if (isNaN(length) || length < 0) {
+    throw new Error("Invalid bencoded string format: invalid length");
+  }
+  const start = colonIndex + 1;
+  const data = bencoded.substring(start, start + length);
+  if (data.length !== length) {
+    throw new Error("Invalid bencoded string format: data length mismatch");
+  }
+  return [data, start + length];
+}
+function decodeInteger(bencoded: string, index: number): [number, number] {
+  if (bencoded[index] !== "i") {
+    throw new Error("Invalid bencoded integer format: missing 'i' prefix");
+  }
+  const endIndex = bencoded.indexOf("e", index);
+  if (endIndex === -1) {
+    throw new Error("Invalid bencoded integer format: missing 'e' suffix");
+  }
+  const intStr = bencoded.substring(index + 1, endIndex);
+  const value = parseInt(intStr, 10);
+  if (isNaN(value)) {
+    throw new Error("Invalid bencoded integer format: invalid number");
+  }
+  return [value, endIndex + 1];
+}
+function decodeList(bencoded: string, index: number): [any[], number] {}
+function decodeDictionary(
+  bencoded: string,
+  index: number,
+): [Record<string, any>, number] {}
+
+function decodeBencode(bencoded: string): any {
+  const [result, nextIndex] = decodeNext(bencoded, 0);
+  if (nextIndex !== bencoded.length) {
+    throw new Error(
+      `Unexpected extra data after valid bencoded string at index ${nextIndex}`,
+    );
+    // const remaining = decodeNext(bencoded, nextIndex)[0];
+    // return { result, remaining };
   }
   return result;
 }
 
-const inputValue: string = process.argv[3] || "4:spam3:foo";
+function decodeNext(bencoded: string, index: number): [any, number] {
+  const type = detectType(bencoded, index);
+  switch (type) {
+    case "integer":
+      return decodeInteger(bencoded, index);
+    case "string":
+      return decodeString(bencoded, index);
+    case "list":
+      return decodeList(bencoded, index);
+    case "dictionary":
+      return decodeDictionary(bencoded, index);
+    default:
+      throw new Error("Invalid bencoded format.");
+  }
+}
+
+const inputValue: string = process.argv[3] || "4:spam";
 if (process.argv[2] === "decode") {
   try {
     const decoded = decodeBencode(inputValue);
@@ -46,8 +90,6 @@ if (process.argv[2] === "decode") {
     console.error("Error decoding bencoded string:", error.message);
   }
 } else {
-  console.log(
-    "The default input value is '4:spam3:foo', which represents two bencoded strings: 'spam' and 'foo'.",
-  );
+  console.log(`The default input value is '${inputValue}'.`);
   console.log("Decoded string:", decodeBencode(inputValue));
 }
