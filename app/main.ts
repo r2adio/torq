@@ -1,5 +1,5 @@
 import { decodeBencode } from "@/utils/bencode";
-import { getTorrentInfo } from "@/core/torrentService";
+import { getTorrentDisplayInfo } from "@/core/torrent.service";
 
 if (process.argv[2] === "decode") {
   const inputValue: string = process.argv[3]
@@ -24,11 +24,9 @@ if (process.argv[2] === "info") {
       })()
     : prompt("Enter the path to the torrent file:") || "";
   try {
-    const decodedTorrent = getTorrentInfo(torrentPath);
-    console.log(
-      "Decoded torrent file:",
-      JSON.stringify(decodedTorrent, null, 2),
-    );
+    const info = getTorrentDisplayInfo(torrentPath);
+    console.log(`Tracker URL: ${info.trackerUrl}`);
+    console.log(`Length: ${info.length}`);
   } catch (error: any) {
     console.error("Error reading torrent file:", error.message);
   }
