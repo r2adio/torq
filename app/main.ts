@@ -1,3 +1,5 @@
+import fs from "fs";
+
 function detectType(bencoded: string, index: number): string {
   if (index >= bencoded.length) return "empty";
 
@@ -102,15 +104,35 @@ function decodeNext(bencoded: string, index: number): [any, number] {
   }
 }
 
-const inputValue: string = process.argv[3] || "d3:foo3:bar5:helloi52ee";
 if (process.argv[2] === "decode") {
+const inputValue: string = process.argv[3] || "d4:spaml1:a1:bee";
   try {
     const decoded = decodeBencode(inputValue);
-    console.log("Decoded string:", decoded);
+    console.log(`Decoded ${typeof decoded}:`, decoded);
   } catch (error: any) {
-    console.error("Error decoding bencoded string:", error.message);
+    console.error("Error decoding:", error.message);
   }
 } else {
-  console.log(`The default input value is '${inputValue}'.`);
-  console.log("Decoded string:", decodeBencode(inputValue));
+  // console.log(`The default input value is '${inputValue}'.`);
+  // console.log("Decoded string:", decodeBencode(inputValue));
+}
+
+// helper function to convert Uint8Array (Buffer) to string
+const bytesToString = (b: Uint8Array): string =>
+  Buffer.from(b).toString("utf-8");
+
+if (process.argv[2] === "info") {
+  if (process.argv[3]) {
+    const torrentPath = process.argv[3];
+    try {
+      const torrentData = fs.readFileSync(torrentPath);
+      const torrentString = bytesToString(torrentData);
+      const decodedTorrent = decodeBencode(torrentString);
+      console.log("Decoded torrent info:", decodedTorrent);
+    } catch (error: any) {
+      console.error("Error reading or decoding torrent file:", error.message);
+    }
+  } else {
+    // TODO: user prompt for torrent file path
+  }
 }
