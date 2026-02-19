@@ -105,16 +105,18 @@ function decodeNext(bencoded: string, index: number): [any, number] {
 }
 
 if (process.argv[2] === "decode") {
-const inputValue: string = process.argv[3] || "d4:spaml1:a1:bee";
+  const inputValue: string = process.argv[3]
+    ? (() => {
+        console.log(`Decoding input value '${process.argv[3]}'.`);
+        return process.argv[3];
+      })()
+    : prompt("Enter a bencoded string to decode:") || "";
   try {
     const decoded = decodeBencode(inputValue);
-    console.log(`Decoded ${typeof decoded}:`, decoded);
+    console.log(`Decoded ${typeof decoded}:`, JSON.stringify(decoded, null, 2));
   } catch (error: any) {
     console.error("Error decoding:", error.message);
   }
-} else {
-  // console.log(`The default input value is '${inputValue}'.`);
-  // console.log("Decoded string:", decodeBencode(inputValue));
 }
 
 // helper function to convert Uint8Array (Buffer) to string
@@ -122,17 +124,21 @@ const bytesToString = (b: Uint8Array): string =>
   Buffer.from(b).toString("utf-8");
 
 if (process.argv[2] === "info") {
-  if (process.argv[3]) {
-    const torrentPath = process.argv[3];
-    try {
-      const torrentData = fs.readFileSync(torrentPath);
-      const torrentString = bytesToString(torrentData);
-      const decodedTorrent = decodeBencode(torrentString);
-      console.log("Decoded torrent info:", decodedTorrent);
-    } catch (error: any) {
-      console.error("Error reading or decoding torrent file:", error.message);
-    }
-  } else {
-    // TODO: user prompt for torrent file path
+  const torrentPath: string = process.argv[3]
+    ? (() => {
+        console.log(`Decoding torrent file at path '${process.argv[3]}'.`);
+        return process.argv[3];
+      })()
+    : prompt("Enter the path to the torrent file:") || "";
+  try {
+    const torrentData = fs.readFileSync(torrentPath);
+    const torrentString = bytesToString(torrentData);
+    const decodedTorrent = decodeBencode(torrentString);
+    console.log(
+      "Decoded torrent file:",
+      JSON.stringify(decodedTorrent, null, 2),
+    );
+  } catch (error: any) {
+    console.error("Error reading torrent file:", error.message);
   }
 }
