@@ -74,8 +74,13 @@ export function decodeDictionary(
   while (currentIndex < buffer.length && buffer[currentIndex] !== 0x65) {
     const [rawKey, nextKeyIndex] = decodeString(buffer, currentIndex);
     const key = rawKey.toString("utf-8");
+    const valueStart = nextKeyIndex;
     const [value, nextValueIndex] = decodeNext(buffer, nextKeyIndex);
+    const valueEnd = nextValueIndex;
     dict[key] = value;
+    if (key === "info" && value !== null && typeof value === "object") {
+      dict._rawInfo = buffer.subarray(valueStart, valueEnd);
+    }
     currentIndex = nextValueIndex;
   }
   if (currentIndex >= buffer.length || buffer[currentIndex] !== 0x65)
