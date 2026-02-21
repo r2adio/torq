@@ -26,8 +26,13 @@ if (process.argv[2] === "info") {
   try {
     const info = getTorrentDisplayInfo(torrentPath);
     console.log(`Tracker URL: ${info.trackerUrl}`);
-    console.log(`Length: ${info.length}`);
+    console.log(`Length: ${info.infoLength}`);
     console.log(`Info Hash: ${info.infoHash}`);
+    console.log(`Piece Length: ${info.pieceLength}`);
+    console.log(`Piece Hashes:`);
+    info.pieceHash.forEach((hash, index) => {
+      console.log(`${index + 1}: ${hash}`);
+    });
   } catch (error: any) {
     console.error("Error reading torrent file:", error.message);
   }
