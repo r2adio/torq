@@ -1,5 +1,6 @@
 import { decodeBencode } from "@/utils/bencode";
 import { getTorrentDisplayInfo } from "@/core/torrent.service";
+import { bufferReplacer } from "@/utils/buffer";
 
 if (process.argv[2] === "decode") {
   const inputValue: string = process.argv[3]
@@ -9,8 +10,8 @@ if (process.argv[2] === "decode") {
       })()
     : prompt("Enter a bencoded string to decode:") || "";
   try {
-    const decoded = decodeBencode(inputValue);
-    console.log(`Decoded ${typeof decoded}:`, JSON.stringify(decoded, null, 2));
+    const decoded = decodeBencode(Buffer.from(inputValue, "utf-8"));
+    console.log("Decoded output:", JSON.stringify(decoded, bufferReplacer, 2));
   } catch (error: any) {
     console.error("Error decoding:", error.message);
   }
