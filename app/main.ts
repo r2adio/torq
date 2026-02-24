@@ -1,5 +1,6 @@
 import { decodeBencode } from "@/utils/bencode";
 import { getTorrentDisplayInfo } from "@/core/torrent.service";
+import { performHandshake } from "@/core/peer.service";
 import { bufferReplacer } from "@/utils/buffer";
 
 if (process.argv[2] === "decode") {
@@ -75,5 +76,17 @@ if (process.argv[2] === "peers") {
     }
   } else {
     console.log("No peers found in tracker response.");
+  }
+}
+
+if (process.argv[2] === "handshake") {
+  const torrentPath: string = process.argv[3]!;
+  const peerAddress: string = process.argv[4]!;
+
+  try {
+    const peerId = await performHandshake(torrentPath, peerAddress);
+    console.log(`Peer ID: ${peerId}`);
+  } catch (error: any) {
+    console.error("Error during handshake:", error.message);
   }
 }
