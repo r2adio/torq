@@ -4,6 +4,7 @@ import { computeInfoHash } from "@/utils/buffer";
 const PROTOCOL_STRING = "BitTorrent protocol";
 const PROTOCOL_STRING_LENGTH = 19;
 
+// generate random 20-byte peer ID
 function generatePeerId(): Buffer {
   const peerId = Buffer.alloc(20);
   for (let i = 0; i < 20; i++) {
@@ -14,7 +15,6 @@ function generatePeerId(): Buffer {
 
 function buildHandshake(infoHash: Buffer, peerId: Buffer): Buffer {
   const handshake = Buffer.alloc(68);
-
   handshake.writeUInt8(PROTOCOL_STRING_LENGTH, 0);
   handshake.write(PROTOCOL_STRING, 1, "ascii");
 
@@ -23,7 +23,6 @@ function buildHandshake(infoHash: Buffer, peerId: Buffer): Buffer {
 
   infoHash.copy(handshake, 28);
   peerId.copy(handshake, 48);
-
   return handshake;
 }
 
@@ -72,8 +71,6 @@ export async function performHandshake(
       },
     },
   });
-
   socket.write(handshake);
-
   return handshakePromise;
 }
