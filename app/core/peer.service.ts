@@ -1,5 +1,6 @@
-import { getTorrentInfo } from "@/core/torrent.service";
+import { getTorrentInfo, getTorrentDisplayInfo } from "@/core/torrent.service";
 import { computeInfoHash } from "@/utils/buffer";
+import { decodeBencode } from "@/utils/bencode";
 
 const PROTOCOL_STRING = "BitTorrent protocol";
 const PROTOCOL_STRING_LENGTH = 19;
@@ -73,4 +74,38 @@ export async function performHandshake(
   });
   socket.write(handshake);
   return handshakePromise;
+}
+
+export async function getPeers(torrentPath: string): Promise<string[]> {
+  const info = getTorrentDisplayInfo(torrentPath);
+  // convert infoHash(40 char) to raw 20 bytes, and percent-encode each byte
+  const rawInfoHash = Buffer.from(info.infoHash, "hex");
+  const encodedInfoHash = Array.from(rawInfoHash)
+    .map((b) => `%${b.toString(16).padStart(2, "0")}`)
+    .join("");
+
+  // peer_id: 20 bytes, format: -<client(2)><version(2)><subversion(2)><random(14)>
+  // INFO: -TR2820-123456789012 = Transmission v2.8.20
+  const url = `${info.trackerUrl}?info_hash=${encodedInfoHash}&peer_id=-TR2820-123456789012&port=6881&uploaded=0&downloaded=0&left=${info.infoLength}&compact=1`;
+  const res = await fetch(url);
+  const responseBuffer = await res.arrayBuffer();
+  const response = decodeBencode(Buffer.from(responseBuffer));
+
+  if (response["failure reason"]) {
+    throw new Error(`Tracker error: ${response["failure reason"]}`);
+  }
+
+  if (!response.peers || !Buffer.isBuffer(response.peers)) {
+    return [];
+  }
+
+  const peersBuffer: Buffer = response.peers;
+  const peers: string[] = [];
+  for (let i = 0; i < peersBuffer.length; i += 6) {
+    // compact peer list: 6 bytes/peer (ip -> 4, port -> 2)
+    const ip = `${peersBuffer[i]}.${peersBuffer[i + 1]}.${peersBuffer[i + 2]}.${peersBuffer[i + 3]}`;
+    const port = (peersBuffer[i + 4]! << 8) | peersBuffer[i + 5]!;
+    peers.push(`${ip}:${port}`);
+  }
+  return peers;
 }
