@@ -3,12 +3,9 @@ import { decodeBencode } from "@/utils/bencode";
 import { bufferReplacer } from "@/utils/buffer";
 
 export const decode = () => {
-  const inputValue: string = process.argv[3]
-    ? (() => {
-        console.log(`Decoding input value '${process.argv[3]}'.`);
-        return process.argv[3];
-      })()
-    : prompt("Enter a bencoded string to decode:") || "";
+  const inputValue: string =
+    process.argv[3] ?? prompt("Enter a bencoded string to decode:") ?? "";
+  if (!inputValue) (console.error("No input provided."), process.exit(1));
   try {
     const decoded = decodeBencode(Buffer.from(inputValue, "utf-8"));
     console.log("Decoded output:", JSON.stringify(decoded, bufferReplacer, 2));
@@ -18,12 +15,10 @@ export const decode = () => {
 };
 
 export const info = () => {
-  const torrentPath: string = process.argv[3]
-    ? (() => {
-        console.log(`Decoding torrent file at path '${process.argv[3]}'.`);
-        return process.argv[3];
-      })()
-    : prompt("Enter the path to the torrent file:") || "";
+  const torrentPath: string =
+    process.argv[3] ?? prompt("Enter the path to torrent file:") ?? "";
+  if (!torrentPath)
+    (console.error("No torrent file path provided."), process.exit(1));
   try {
     const info = getTorrentDisplayInfo(torrentPath);
     console.log(`Tracker URL: ${info.trackerUrl}`);

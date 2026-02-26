@@ -3,12 +3,8 @@ import { getTorrentDisplayInfo } from "@/core/torrent.service";
 import { decodeBencode } from "@/utils/bencode";
 
 export const peers = async () => {
-  const torrentPath: string = process.argv[3]
-    ? (() => {
-        console.log(`Decoding torrent file at path '${process.argv[3]}'.`);
-        return process.argv[3];
-      })()
-    : prompt("Enter the path to the torrent file:") || "";
+  const torrentPath: string =
+    process.argv[3] ?? prompt("Enter the path to the torrent file:") ?? "";
   const info = getTorrentDisplayInfo(torrentPath);
   // convert infoHash(40 char) to raw 20 bytes, and percent-encode each byte
   const rawInfoHash = Buffer.from(info.infoHash, "hex");
@@ -22,9 +18,6 @@ export const peers = async () => {
   const res = await fetch(url);
   const responseBuffer = await res.arrayBuffer();
   const response = decodeBencode(Buffer.from(responseBuffer)); // decoede the tracker response
-  // console.log(url);
-  // console.log(response);
-  // console.log(res);
 
   if (response["failure reason"]) {
     console.log(`Tracker error: ${response["failure reason"]}`);
@@ -42,9 +35,10 @@ export const peers = async () => {
 };
 
 export const handshake = async () => {
-  const torrentPath: string = process.argv[3]!;
-  const peerAddress: string = process.argv[4]!;
-
+  const torrentPath: string =
+    process.argv[3] ?? prompt("Enter the path to the torrent file:") ?? "";
+  const peerAddress: string =
+    process.argv[4] ?? prompt("Enter the peer address (ip:port):") ?? "";
   try {
     const peerId = await performHandshake(torrentPath, peerAddress);
     console.log(`Peer ID: ${peerId}`);
