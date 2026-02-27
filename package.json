@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "build": "bun build app/main.ts --outdir=dist",
-    "dev": "bun run --hot app/main.ts",
+    "dev:cli": "bun run --hot app/main.ts",
+    "dev:ui": "bun run --hot app/ui/main.ts",
     "test": "bun test"
   },
   "devDependencies": {
@@ -16,6 +17,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "bencode": "^4.0.0"
+    "@opentui/core": "^0.1.81"
   }
 }
