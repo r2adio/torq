@@ -17,4 +17,3 @@
      └── files:
        ├── path: ["file1.txt"], length: 1000
        └── path: ["subfolder", "file2.txt"], length: 2000
-
