@@ -17,12 +17,18 @@ export default function footer(renderer: any) {
     fg: TORQ_COLORS[torqColorIndex],
   });
 
-  setInterval(() => {
+  const colorInterval = setInterval(() => {
+    if (renderer.isDestroyed) return;
     torqColorIndex = (torqColorIndex + 1) % TORQ_COLORS.length;
     torqText.fg = TORQ_COLORS[torqColorIndex];
   }, 1000);
 
   renderer.requestLive();
+
+  renderer.on("destroy", () => {
+    clearInterval(colorInterval);
+    renderer.dropLive();
+  });
 
   return Box(
     {
