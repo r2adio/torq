@@ -1,5 +1,29 @@
-import { Box, Text, TextAttributes } from "@opentui/core";
-export default function footer() {
+import { Box, Text, TextRenderable, TextAttributes, RGBA } from "@opentui/core";
+
+const TORQ_COLORS: RGBA[] = [
+  RGBA.fromHex("#ff6b6b")!,
+  RGBA.fromHex("#feca57")!,
+  RGBA.fromHex("#48dbfb")!,
+  RGBA.fromHex("#ff9ff3")!,
+  RGBA.fromHex("#54a0ff")!,
+  RGBA.fromHex("#5f27cd")!,
+];
+
+export default function footer(renderer: any) {
+  let torqColorIndex = 0;
+
+  const torqText = new TextRenderable(renderer, {
+    content: "torq",
+    fg: TORQ_COLORS[torqColorIndex],
+  });
+
+  setInterval(() => {
+    torqColorIndex = (torqColorIndex + 1) % TORQ_COLORS.length;
+    torqText.fg = TORQ_COLORS[torqColorIndex];
+  }, 1000);
+
+  renderer.requestLive();
+
   return Box(
     {
       alignItems: "stretch",
@@ -14,7 +38,7 @@ export default function footer() {
     // project name, version
     Box(
       { flexDirection: "row", alignItems: "center", gap: 1 },
-      Text({ content: "torq", fg: "orange" }),
+      torqText,
       Text({ content: "v0.1.0" }),
     ),
     // project navigation hints
