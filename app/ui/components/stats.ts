@@ -2,6 +2,8 @@ import { Box, TextRenderable, TextAttributes } from "@opentui/core";
 import getStats from "@/ui/utils/stats.util";
 import type { Stats } from "@/ui/utils/stats.util";
 
+const STATS_REFRESH_INTERVAL_MS = 1000;
+
 interface StatConfig {
   label: string;
   key: keyof Stats;
@@ -12,25 +14,25 @@ interface StatConfig {
 interface StatText {
   text: TextRenderable;
   key: keyof Stats;
+  label: string;
 }
 
 function createStatTexts(renderer: any, configs: StatConfig[]): StatText[] {
-  return configs.map((config) => {
-    const text = new TextRenderable(renderer, {
+  return configs.map((c) => ({
+    text: new TextRenderable(renderer, {
       content: "",
-      fg: config.fg || "white",
-      attributes: config.attributes,
-    });
-    return { text, key: config.key };
-  });
+      fg: c.fg ?? "white",
+      attributes: c.attributes,
+    }),
+    key: c.key,
+    label: c.label,
+  }));
 }
 
 function updateStatTexts(stats: Stats, statTexts: StatText[]): void {
-  statTexts.forEach(({ text, key }) => {
-    const value = stats[key];
-    const label = statConfigs.find((c) => c.key === key)?.label || "";
-    text.content = `${label}: ${value}`;
-  });
+  for (const st of statTexts) {
+    st.text.content = `${st.label}: ${stats[st.key]}`;
+  }
 }
 
 const statConfigs: StatConfig[] = [
@@ -41,7 +43,7 @@ const statConfigs: StatConfig[] = [
     label: "DLL Speed",
     key: "dllSpeed",
     fg: "white",
-    attributes: TextAttributes.BOLD as unknown as number,
+    attributes: Number(TextAttributes.BOLD),
   },
   { label: "Session DLL", key: "sessionDll", fg: "white" },
   { label: "Lifetime DLL", key: "lifetimeDll", fg: "white" },
@@ -49,7 +51,7 @@ const statConfigs: StatConfig[] = [
     label: "UL Speed",
     key: "ulSpeed",
     fg: "white",
-    attributes: TextAttributes.BOLD as unknown as number,
+    attributes: Number(TextAttributes.BOLD),
   },
   { label: "Session UL", key: "sessionUl", fg: "white" },
   { label: "Lifetime UL", key: "lifetimeUl", fg: "white" },
@@ -67,20 +69,28 @@ const statConfigs: StatConfig[] = [
   { label: "Write Slots", key: "writeSlots", fg: "white" },
 ];
 
-export default function stats(renderer: any) {
-  const s = getStats();
+interface Renderer {
+  isDestroyed: boolean;
+  requestLive(): void;
+  dropLive(): void;
+  on(event: "destroy", cb: () => void): void;
+}
 
+export default function stats(renderer: Renderer) {
   const statTexts = createStatTexts(renderer, statConfigs);
-  updateStatTexts(s, statTexts);
+  updateStatTexts(getStats(), statTexts);
 
   const statsInterval = setInterval(() => {
     if (renderer.isDestroyed) return;
-    const currentStats = getStats();
-    updateStatTexts(currentStats, statTexts);
-  }, 1000);
+    try {
+      const currentStats = getStats();
+      updateStatTexts(currentStats, statTexts);
+    } catch (error) {
+      console.error("Failed to update stats:", error);
+    }
+  }, STATS_REFRESH_INTERVAL_MS);
 
   renderer.requestLive();
-
   renderer.on("destroy", () => {
     clearInterval(statsInterval);
     renderer.dropLive();
