@@ -6,7 +6,7 @@
   "scripts": {
     "build": "bun build app/main.ts --outdir=dist",
     "dev:cli": "bun run --hot app/main.ts",
-    "dev:ui": "bun run --hot app/ui/main.ts",
+    "dev:ui": "bun run --hot app/ui/app.ts",
     "test": "bun test"
   },
   "devDependencies": {
