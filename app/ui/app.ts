@@ -4,10 +4,10 @@ import { extras, footer, network, stats, torrents } from "@/ui/components";
 
 export function createApp(renderer: any) {
   return Box(
-    { flexDirection: "column", padding: 1 },
+    { flexDirection: "column", paddingBottom: 1 },
     torrents(renderer),
     Box(
-      { flexDirection: "row", flexGrow: 1, justifyContent: "flex-start" },
+      { flexDirection: "row", justifyContent: "flex-start" },
       network(renderer),
       extras(renderer),
       stats(renderer),

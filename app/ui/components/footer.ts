@@ -36,7 +36,7 @@ export default function footer(renderer: any) {
       justifyContent: "space-between",
       position: "absolute",
       paddingX: 3,
-      bottom: 2,
+      bottom: 1,
       height: 0,
       width: "100%",
       flexDirection: "row",

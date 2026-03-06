@@ -8,7 +8,7 @@ interface Renderer {
 
 export default function extra(renderer: Renderer) {
   return Box(
-    { flexDirection: "column", width: "15%" },
+    { flexDirection: "column", width: "10%" },
     blocks(renderer),
     disk(renderer),
   );
@@ -21,9 +21,8 @@ function blocks(renderer: Renderer) {
       justifyContent: "space-between",
       position: "static",
       paddingX: 3,
-      height: "80%",
+      height: "65%",
       border: true,
-      bottom: 1,
       borderColor: "grey",
     },
     Text({ content: "Network stats will go here", fg: "white" }),
@@ -38,11 +37,10 @@ function disk(renderer: Renderer) {
       justifyContent: "space-between",
       position: "static",
       paddingX: 3,
-      height: "20%",
-      bottom: 2,
+      flexGrow: 1,
       border: true,
       borderColor: "grey",
     },
-    Text({ content: "Network stats will go here", fg: "white" }),
+    Text({ content: "", fg: "white" }),
   );
 }

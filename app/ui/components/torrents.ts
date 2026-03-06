@@ -6,7 +6,7 @@ interface Renderer {
   on(event: "destroy", cb: () => void): void;
 }
 
-export default function network(renderer: Renderer) {
+export default function torrents(renderer: Renderer) {
   return Box(
     {
       title: "/path/to/torrents",
@@ -14,8 +14,8 @@ export default function network(renderer: Renderer) {
       justifyContent: "space-between",
       position: "static",
       paddingX: 3,
-      height: "60%",
-      bottom: 1,
+      height: "35%",
+      width: "50%",
       border: true,
       borderColor: "grey",
     },
