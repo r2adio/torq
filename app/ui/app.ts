@@ -1,14 +1,15 @@
 import { createCliRenderer } from "@opentui/core";
 import { Box } from "@opentui/core";
-import { footer, stats } from "@/ui/components";
+import { extras, footer, network, stats, torrents } from "@/ui/components";
 
 export function createApp(renderer: any) {
   return Box(
-    { flexDirection: "column", height: "100%", width: "100%" },
-    // meta(),
+    { flexDirection: "column", padding: 1 },
+    torrents(renderer),
     Box(
-      { flexDirection: "row", flexGrow: 1 },
-      // networkActivity(),
+      { flexDirection: "row", flexGrow: 1, justifyContent: "flex-start" },
+      network(renderer),
+      extras(renderer),
       stats(renderer),
     ),
     footer(renderer),

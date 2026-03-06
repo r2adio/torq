@@ -9,12 +9,12 @@ interface Renderer {
 export default function network(renderer: Renderer) {
   return Box(
     {
-      title: "Network Activity",
+      title: "/path/to/torrents",
       alignItems: "stretch",
       justifyContent: "space-between",
       position: "static",
       paddingX: 3,
-      width: "65%",
+      height: "60%",
       bottom: 1,
       border: true,
       borderColor: "grey",
