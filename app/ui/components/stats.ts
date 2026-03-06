@@ -36,9 +36,9 @@ function updateStatTexts(stats: Stats, statTexts: StatText[]): void {
 }
 
 const statConfigs: StatConfig[] = [
-  { label: "Run Time", key: "runTime", fg: "green" },
+  { label: "Run Time", key: "runTime", fg: "white" },
   { label: "RSS Sync", key: "rssSync", fg: "white" },
-  { label: "Torrents", key: "torrents", fg: "yellow" },
+  { label: "Torrents", key: "torrents", fg: "white" },
   {
     label: "DLL Speed",
     key: "dllSpeed",
@@ -106,7 +106,7 @@ export default function stats(renderer: Renderer) {
     {
       title: "Stats",
       alignItems: "stretch",
-      justifyContent: "flex-start",
+      justifyContent: "flex-end",
       position: "relative",
       gap: 1,
       flexGrow: 1,

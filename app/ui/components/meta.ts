@@ -1,4 +1,4 @@
-import { Box, Text } from "@opentui/core";
+import { Box, Text, TextAttributes } from "@opentui/core";
 interface Renderer {
   isDestroyed: boolean;
   requestLive(): void;
@@ -38,12 +38,14 @@ function details(renderer: Renderer) {
 function peer_stream(renderer: Renderer) {
   return Box(
     {
-      title: "Peer Stream",
+      title: "Peer Stream       Connected: 0  Discovered: 0  Disconnected: 0",
+      // title: "Peer Strea",
       alignItems: "stretch",
       justifyContent: "space-between",
       position: "static",
       paddingX: 3,
       flexGrow: 1,
+      width: "15%",
       border: true,
       borderColor: "grey",
     },
@@ -54,14 +56,17 @@ function peer_stream(renderer: Renderer) {
 function swarm(renderer: Renderer) {
   return Box(
     {
-      title: "Swarm Availability",
       alignItems: "stretch",
-      justifyContent: "space-between",
+      justifyContent: "flex-start",
       position: "static",
-      height: 0,
-      border: true,
-      borderColor: "white",
+      width: "100%",
+      height: 5,
+      paddingX: 1,
     },
-    Text({ content: "", fg: "white" }),
+    Text({
+      content: "Swarm Availability",
+      attributes: TextAttributes.BOLD,
+      fg: "white",
+    }),
   );
 }

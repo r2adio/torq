@@ -26,7 +26,7 @@ export function createApp(renderer: Renderer) {
       extras(renderer),
       stats(renderer),
     ),
-    footer(renderer),
+    Box({}, footer(renderer)),
   );
 }
 

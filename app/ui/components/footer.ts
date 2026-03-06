@@ -35,7 +35,7 @@ export default function footer(renderer: any) {
       alignItems: "stretch",
       justifyContent: "space-between",
       position: "absolute",
-      bottom: 1,
+      bottom: 0,
       height: 0,
       width: "100%",
       flexDirection: "row",
