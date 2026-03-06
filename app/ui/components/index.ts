@@ -3,5 +3,6 @@ import stats from "./stats";
 import network from "./network";
 import extras from "./extras";
 import torrents from "./torrents";
+import meta from "./meta";
 
-export { footer, stats, network, extras, torrents };
+export { footer, stats, network, extras, torrents, meta };

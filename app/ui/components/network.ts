@@ -13,7 +13,6 @@ export default function network(renderer: Renderer) {
       alignItems: "stretch",
       justifyContent: "space-between",
       position: "static",
-      paddingX: 3,
       // flexGrow: 1,
       width: "70%",
       border: true,
