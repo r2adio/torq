@@ -1,0 +1,41 @@
+* torq
+A BitTorrent client implementation in TypeScript using Bun.
+
+** Features
+- *Decode* - Decode bencoded strings
+- *Info* - Display torrent file metadata (tracker URL, length, info hash, piece info)
+- *Peers* - Discover peers from tracker
+- *Handshake* - Perform BitTorrent handshake with peers
+
+** Installation
+#+begin_src bash
+bun install
+#+end_src
+
+** Usage
+#+begin_src bash
+# display torrent file info
+bun dev:cli info path/to/file.torrent
+
+# discover peers from tracker
+bun dev:cli peers path/to/file.torrent
+
+# perform peer handshake
+bun dev:cli handshake path/to/file.torrent <peer_ip>:<peer_port>
+#+end_src
+
+** Development
+#+begin_src bash
+# run cli
+bun run dev:cli
+
+# run tests
+bun test
+#+end_src
+
+** Project Structure
+- ~app/main.ts~ - Entry point
+- ~app/cmds/~ - CLI commands
+- ~app/core/~ - Core torrent logic
+- ~app/utils/~ - Utilities (bencode, buffer)
+- ~app/ui/~ - UI components (TUI)
