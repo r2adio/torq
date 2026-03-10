@@ -1,3 +1,6 @@
+export const COMMANDS = ["decode", "info", "peers", "handshake"] as const;
+export type Command = (typeof COMMANDS)[number];
+
 import { decode, info } from "./base.cmd";
 import { handshake, peers } from "./peers.cmd";
 

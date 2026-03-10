@@ -1,14 +1,18 @@
-const validCommand = ["decode", "info", "peers", "handshake"].includes(
-  process.argv[2] || "",
-);
-if (validCommand) {
-  import("@/cmds").then(({ runCLI }) => runCLI());
-} else if (process.argv[2]) {
-  console.log(`Unknown command: ${process.argv[2]}`);
+import { COMMANDS, type Command } from "@/cmds";
+const command = process.argv[2];
+
+if (COMMANDS.includes(command as Command)) {
+  import("@/cmds")
+    .then(({ runCLI }) => runCLI())
+    .catch((err) => {
+      console.error("Failed to run command:", err);
+      process.exit(1);
+    });
+} else if (command) {
+  console.log(`Unknown command: ${command}`);
   console.log("Available commands:");
-  ["decode", "info", "peers", "handshake"].forEach((cmd) =>
-    console.log(`- ${cmd}`),
-  );
+  COMMANDS.forEach((cmd) => console.log(`- ${cmd}`));
+  process.exit(1);
 } else {
   // import("@/tui").then(({ runTUI }) => runTUI());
 }
