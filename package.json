@@ -4,9 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "bun build app/main.ts --outdir=dist",
-    "dev:cli": "bun run --hot app/main.ts",
-    "dev:ui": "bun run --hot app/ui/app.ts",
+    "build": "bun build --compile ./app/main.ts --outfile torq",
+    "dev": "bun run --hot app/main.ts",
     "test": "bun test"
   },
   "devDependencies": {
