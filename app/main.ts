@@ -1,6 +1,7 @@
 import { COMMANDS } from "@/cmds";
 
-const args = process.argv.slice(2);
+const isBunRuntime = process.argv[0]?.includes("bun") ?? true;
+const args = process.argv.slice(isBunRuntime ? 2 : 1);
 
 if (args.length > 0) {
   const command = args[0] as (typeof COMMANDS)[number];
