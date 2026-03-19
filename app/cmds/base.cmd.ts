@@ -26,9 +26,9 @@ export const info = () => {
     console.log(`Info Hash: ${info.infoHash}`);
     console.log(`Piece Length: ${info.pieceLength}`);
     console.log(`Piece Hashes:`);
-    info.pieceHash.forEach((hash, index) => {
-      console.log(`${index + 1}: ${hash}`);
-    });
+    info.pieceHash.forEach((hash, index) =>
+      console.log(`${index + 1}: ${hash}`),
+    );
   } catch (error: any) {
     console.error("Error reading torrent file:", error.message);
   }

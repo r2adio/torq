@@ -8,9 +8,7 @@ const PROTOCOL_STRING_LENGTH = 19;
 // generate random 20-byte peer ID
 function generatePeerId(): Buffer {
   const peerId = Buffer.alloc(20);
-  for (let i = 0; i < 20; i++) {
-    peerId[i] = Math.floor(Math.random() * 256);
-  }
+  for (let i = 0; i < 20; i++) peerId[i] = Math.floor(Math.random() * 256);
   return peerId;
 }
 
@@ -66,9 +64,7 @@ export async function performHandshake(
         rejectHandshake(error);
       },
       close(socket) {
-        if (!resolveHandshake) {
-          rejectHandshake(new Error("Connection closed"));
-        }
+        if (!resolveHandshake) rejectHandshake(new Error("Connection closed"));
       },
     },
   });
@@ -91,13 +87,10 @@ export async function getPeers(torrentPath: string): Promise<string[]> {
   const responseBuffer = await res.arrayBuffer();
   const response = decodeBencode(Buffer.from(responseBuffer));
 
-  if (response["failure reason"]) {
+  if (response["failure reason"])
     throw new Error(`Tracker error: ${response["failure reason"]}`);
-  }
 
-  if (!response.peers || !Buffer.isBuffer(response.peers)) {
-    return [];
-  }
+  if (!response.peers || !Buffer.isBuffer(response.peers)) return [];
 
   const peersBuffer: Buffer = response.peers;
   const peers: string[] = [];

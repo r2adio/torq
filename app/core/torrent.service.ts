@@ -22,9 +22,8 @@ export function getTorrentDisplayInfo(torrentPath: string): {
   if (pieces.length % 20 !== 0)
     throw new Error("Invalid pieces length in torrent file.");
   const pieceHash: string[] = [];
-  for (let i = 0; i < pieces.length; i += 20) {
+  for (let i = 0; i < pieces.length; i += 20)
     pieceHash.push(pieces.subarray(i, i + 20).toString("hex"));
-  }
 
   return {
     trackerUrl: decoded.announce.toString("utf-8"),

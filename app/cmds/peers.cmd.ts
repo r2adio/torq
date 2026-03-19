@@ -1,11 +1,11 @@
-import { performHandshake, getPeers } from "@/core/peer.service";
+import { getPeers, performHandshake } from "@/core/peer.service";
 
 export const peers = async () => {
   const torrentPath: string =
     process.argv[3] ?? prompt("Enter the path to the torrent file:") ?? "";
   try {
     const peerList = await getPeers(torrentPath);
-    if (peerList.length === 0) {
+    if (!peerList.length) {
       console.log("No peers found in tracker response.");
       return;
     }
