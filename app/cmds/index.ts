@@ -1,13 +1,23 @@
-export const COMMANDS = ["decode", "info", "peers", "handshake"] as const;
+export const COMMANDS = [
+  "info",
+  "peers",
+  "decode",
+  "download",
+  "handshake",
+  "download_piece",
+] as const;
 
 import { decode, info } from "./base.cmd";
 import { handshake, peers } from "./peers.cmd";
+import { download, download_piece } from "./download.cmd";
 
 const commands = {
   decode,
   info,
   peers,
   handshake,
+  download_piece,
+  download,
 } as const;
 
 export const runCLI = () => {
