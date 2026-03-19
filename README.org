@@ -14,14 +14,20 @@ bun install
 
 ** Usage
 #+begin_src bash
+# opens the terminal ui
+bun dev
+
 # display torrent file info
-bun dev:cli info path/to/file.torrent
+bun dev info sample.torrent
 
 # discover peers from tracker
-bun dev:cli peers path/to/file.torrent
+bun dev peers sample.torrent
 
-# perform peer handshake
-bun dev:cli handshake path/to/file.torrent <peer_ip>:<peer_port>
+# perform peer handshake with tracker
+bun dev handshake sample.torrent <peer_ip>:<peer_port>
+
+# downlaod a piece from tracker
+bun dev downlaod_piece -o /tmp/test-piece sample.torrent <piece_index>
 #+end_src
 
 ** Development
