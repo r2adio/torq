@@ -25,13 +25,12 @@ function details(renderer: Renderer) {
       border: true,
       borderColor: "grey",
     },
-    Text({ content: "Progrss: ", fg: "white" }),
-    Text({ content: "Progrss: ", fg: "white" }),
-    Text({ content: "Progrss: ", fg: "white" }),
-    Text({ content: "Progrss: ", fg: "white" }),
-    Text({ content: "Progrss: ", fg: "white" }),
-    Text({ content: "Progrss: ", fg: "white" }),
-    Text({ content: "Progrss: ", fg: "white" }),
+    Text({ content: "Progress: ", fg: "white" }),
+    Text({ content: "Progress: ", fg: "white" }),
+    Text({ content: "Progress: ", fg: "white" }),
+    Text({ content: "Progress: ", fg: "white" }),
+    Text({ content: "Progress: ", fg: "white" }),
+    Text({ content: "Progress: ", fg: "white" }),
   );
 }
 
@@ -60,7 +59,7 @@ function swarm(renderer: Renderer) {
       justifyContent: "flex-start",
       position: "static",
       width: "100%",
-      height: 5,
+      // height: 5,
       paddingX: 1,
     },
     Text({

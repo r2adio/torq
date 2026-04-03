@@ -106,9 +106,9 @@ export default function stats(renderer: Renderer) {
     {
       title: "Stats",
       alignItems: "stretch",
-      justifyContent: "flex-end",
+      justifyContent: "flex-start",
       position: "relative",
-      gap: 1,
+      // gap: 1,
       flexGrow: 1,
       border: true,
       borderColor: "grey",
