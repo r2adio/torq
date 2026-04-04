@@ -13,7 +13,7 @@ export default function torrents(renderer: Renderer) {
       alignItems: "stretch",
       justifyContent: "flex-start",
       position: "static",
-      minHeight: 18,
+      maxHeight: 17,
       width: "45%",
       border: true,
       borderColor: "grey",
@@ -33,7 +33,7 @@ export default function torrents(renderer: Renderer) {
     Text({ content: "Torrent 12: ", fg: "white" }),
     Text({ content: "Torrent 13: ", fg: "white" }),
     Text({ content: "Torrent 14: ", fg: "white" }),
-    Text({ content: "Torrent 15: ", fg: "white" }),
+    // Text({ content: "Torrent 15: ", fg: "white" }),
     // Text({ content: "Torrent 16: ", fg: "white" }),
   );
 }
