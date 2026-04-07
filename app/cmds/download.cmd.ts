@@ -13,6 +13,8 @@ import {
 const PROTOCOL_STRING = "BitTorrent protocol";
 const PROTOCOL_STRING_LENGTH = 19;
 const BLOCK_SIZE = 16 * 1024;
+const PEER_CONNECT_TIMEOUT_MS = 5000;
+const PIECE_DOWNLOAD_TIMEOUT_MS = 20000;
 
 function generatePeerId(): Buffer {
   const peerId = Buffer.alloc(20); // peer-ID for BitTorrent protocol identification
@@ -54,77 +56,131 @@ async function requestPieceWithPeerSession(
     let handshakeComplete = false;
     let downloadedBytes = 0;
 
-    const socket = await Bun.connect({
-      hostname: ip,
-      port,
-      socket: {
-        data(socket, data) {
-          receivedData = Buffer.concat([receivedData, Buffer.from(data)]);
+    let isSettled = false;
+    let connectTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    let downloadTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-          if (!handshakeComplete && receivedData.length >= 68) {
-            receivedData = receivedData.subarray(68);
-            handshakeComplete = true;
-            socket.write(buildInterestedMessage());
-          }
+    const clearTimers = () => {
+      if (connectTimeoutId) clearTimeout(connectTimeoutId);
+      if (downloadTimeoutId) clearTimeout(downloadTimeoutId);
+    };
 
-          while (receivedData.length >= 4) {
-            const messageLength = receivedData.readUInt32BE(0);
+    const settleResolve = (value: Buffer) => {
+      if (isSettled) return;
+      isSettled = true;
+      clearTimers();
+      resolve(value);
+    };
 
-            if (messageLength === 0) {
-              receivedData = receivedData.subarray(4);
-              continue;
+    const settleReject = (error: Error) => {
+      if (isSettled) return;
+      isSettled = true;
+      clearTimers();
+      reject(error);
+    };
+
+    try {
+      const socket = await Bun.connect({
+        hostname: ip,
+        port,
+        socket: {
+          data(socket, data) {
+            receivedData = Buffer.concat([receivedData, Buffer.from(data)]);
+
+            if (!handshakeComplete && receivedData.length >= 68) {
+              if (connectTimeoutId) clearTimeout(connectTimeoutId);
+              receivedData = receivedData.subarray(68);
+              handshakeComplete = true;
+              socket.write(buildInterestedMessage());
             }
 
-            if (receivedData.length < 4 + messageLength) break;
+            while (receivedData.length >= 4) {
+              const messageLength = receivedData.readUInt32BE(0);
 
-            const messageId = receivedData.readUInt8(4);
-            const payload = receivedData.subarray(5, 4 + messageLength);
-            receivedData = receivedData.subarray(4 + messageLength);
-
-            if (messageId === MESSAGE_TYPES.UNCHOKE) {
-              const numBlocks = Math.ceil(transferPlan.pieceSize / BLOCK_SIZE);
-              for (let i = 0; i < numBlocks; i++) {
-                const begin = i * BLOCK_SIZE;
-                const length = Math.min(
-                  BLOCK_SIZE,
-                  transferPlan.pieceSize - begin,
-                );
-                socket.write(
-                  buildRequestMessage(transferPlan.pieceIndex, begin, length),
-                );
+              if (messageLength === 0) {
+                receivedData = receivedData.subarray(4);
+                continue;
               }
-            }
 
-            if (messageId === MESSAGE_TYPES.PIECE) {
-              const { index, begin, block } = parsePieceMessage(payload);
+              if (receivedData.length < 4 + messageLength) break;
 
-              if (index === transferPlan.pieceIndex) {
-                block.copy(pieceData, begin);
-                downloadedBytes += block.length;
+              const messageId = receivedData.readUInt8(4);
+              const payload = receivedData.subarray(5, 4 + messageLength);
+              receivedData = receivedData.subarray(4 + messageLength);
 
-                if (downloadedBytes >= transferPlan.pieceSize) {
-                  socket.end();
-                  resolve(pieceData);
+              if (messageId === MESSAGE_TYPES.UNCHOKE) {
+                const numBlocks = Math.ceil(transferPlan.pieceSize / BLOCK_SIZE);
+                for (let i = 0; i < numBlocks; i++) {
+                  const begin = i * BLOCK_SIZE;
+                  const length = Math.min(
+                    BLOCK_SIZE,
+                    transferPlan.pieceSize - begin,
+                  );
+                  socket.write(
+                    buildRequestMessage(transferPlan.pieceIndex, begin, length),
+                  );
+                }
+              }
+
+              if (messageId === MESSAGE_TYPES.PIECE) {
+                const { index, begin, block } = parsePieceMessage(payload);
+
+                if (index === transferPlan.pieceIndex) {
+                  block.copy(pieceData, begin);
+                  downloadedBytes += block.length;
+
+                  if (downloadedBytes >= transferPlan.pieceSize) {
+                    socket.end();
+                    settleResolve(pieceData);
+                  }
                 }
               }
             }
-          }
-        },
-        error(socket, error) {
-          reject(error);
-        },
-        close(socket) {
-          if (downloadedBytes < transferPlan.pieceSize)
-            reject(
+          },
+          error(socket, error) {
+            socket.end();
+            settleReject(
               new Error(
-                `Connection closed before piece download completed (${downloadedBytes}/${transferPlan.pieceSize} bytes)`,
+                `Peer connection error for ${peerAddress}: ${error.message}`,
               ),
             );
+          },
+          close() {
+            if (downloadedBytes < transferPlan.pieceSize) {
+              settleReject(
+                new Error(
+                  `Connection closed before piece download completed (${downloadedBytes}/${transferPlan.pieceSize} bytes) for ${peerAddress}`,
+                ),
+              );
+            }
+          },
         },
-      },
-    });
+      });
 
-    socket.write(handshake);
+      connectTimeoutId = setTimeout(() => {
+        socket.end();
+        settleReject(
+          new Error(
+            `Peer connect timed out after ${PEER_CONNECT_TIMEOUT_MS}ms for ${peerAddress}`,
+          ),
+        );
+      }, PEER_CONNECT_TIMEOUT_MS);
+
+      downloadTimeoutId = setTimeout(() => {
+        socket.end();
+        settleReject(
+          new Error(
+            `Piece download timed out after ${PIECE_DOWNLOAD_TIMEOUT_MS}ms (${downloadedBytes}/${transferPlan.pieceSize} bytes) from ${peerAddress}`,
+          ),
+        );
+      }, PIECE_DOWNLOAD_TIMEOUT_MS);
+
+      socket.write(handshake);
+    } catch (error: any) {
+      settleReject(
+        new Error(`Unable to connect to peer ${peerAddress}: ${error.message}`),
+      );
+    }
   });
 }
 

@@ -4,6 +4,8 @@ import { decodeBencode } from "@/utils/bencode";
 
 const PROTOCOL_STRING = "BitTorrent protocol";
 const PROTOCOL_STRING_LENGTH = 19;
+const CONNECT_TIMEOUT_MS = 5000;
+const TRACKER_TIMEOUT_MS = 8000;
 
 // generate random 20-byte peer ID
 function generatePeerId(): Buffer {
@@ -40,36 +42,71 @@ export async function performHandshake(
   const peerId = generatePeerId();
   const handshake = buildHandshake(infoHash, peerId);
 
-  let resolveHandshake!: (value: string) => void;
-  let rejectHandshake!: (reason: any) => void;
+  return new Promise<string>(async (resolve, reject) => {
+    let isSettled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-  const handshakePromise = new Promise<string>((resolve, reject) => {
-    resolveHandshake = resolve;
-    rejectHandshake = reject;
-  });
+    const settle = (
+      callback: (value?: string | Error) => void,
+      value?: string | Error,
+    ) => {
+      if (isSettled) return;
+      isSettled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      callback(value);
+    };
 
-  const socket = await Bun.connect({
-    hostname: ip,
-    port: port,
-    socket: {
-      data(socket, data) {
-        if (data.length >= 68) {
-          const receivedPeerId = data.subarray(48, 68);
-          const peerIdHex = receivedPeerId.toString("hex");
-          socket.end();
-          resolveHandshake(peerIdHex);
-        }
-      },
-      error(socket, error) {
-        rejectHandshake(error);
-      },
-      close(socket) {
-        if (!resolveHandshake) rejectHandshake(new Error("Connection closed"));
-      },
-    },
+    try {
+      const socket = await Bun.connect({
+        hostname: ip,
+        port: port,
+        socket: {
+          data(socket, data) {
+            if (data.length >= 68) {
+              const receivedPeerId = data.subarray(48, 68);
+              const peerIdHex = receivedPeerId.toString("hex");
+              socket.end();
+              settle((value) => resolve(value as string), peerIdHex);
+            }
+          },
+          error(socket, error) {
+            socket.end();
+            settle(
+              (value) => reject(value),
+              new Error(
+                `Peer connection error for ${peerAddress}: ${error.message}`,
+              ),
+            );
+          },
+          close() {
+            settle(
+              (value) => reject(value),
+              new Error(
+                `Connection closed before handshake completed for ${peerAddress}`,
+              ),
+            );
+          },
+        },
+      });
+
+      timeoutId = setTimeout(() => {
+        socket.end();
+        settle(
+          (value) => reject(value),
+          new Error(
+            `Handshake timed out after ${CONNECT_TIMEOUT_MS}ms for ${peerAddress}`,
+          ),
+        );
+      }, CONNECT_TIMEOUT_MS);
+
+      socket.write(handshake);
+    } catch (error: any) {
+      settle(
+        (value) => reject(value),
+        new Error(`Unable to connect to ${peerAddress}: ${error.message}`),
+      );
+    }
   });
-  socket.write(handshake);
-  return handshakePromise;
 }
 
 export async function getPeers(torrentPath: string): Promise<string[]> {
@@ -83,7 +120,10 @@ export async function getPeers(torrentPath: string): Promise<string[]> {
   // peer_id: 20 bytes, format: -<client(2)><version(2)><subversion(2)><random(14)>
   // INFO: -TR2820-123456789012 = Transmission v2.8.20
   const url = `${info.trackerUrl}?info_hash=${encodedInfoHash}&peer_id=-TR2820-123456789012&port=6881&uploaded=0&downloaded=0&left=${info.infoLength}&compact=1`;
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    // timeout helps to avoid indefinite hangs on tracker fetch
+    signal: AbortSignal.timeout(TRACKER_TIMEOUT_MS),
+  });
   const responseBuffer = await res.arrayBuffer();
   const response = decodeBencode(Buffer.from(responseBuffer));
 
