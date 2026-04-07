@@ -6,7 +6,6 @@ import { computeInfoHash } from "@/utils/buffer";
 import {
   buildInterestedMessage,
   buildRequestMessage,
-  parseMessage,
   parsePieceMessage,
   MESSAGE_TYPES,
 } from "@/core/message.service";
@@ -32,102 +31,82 @@ function buildHandshake(infoHash: Buffer, peerId: Buffer): Buffer {
   return handshake;
 }
 
-async function downloadPieceFromPeer(
+type PieceTransferPlan = {
+  pieceIndex: number;
+  pieceSize: number;
+};
+
+async function requestPieceWithPeerSession(
   peerAddress: string,
-  torrentPath: string,
-  pieceIndex: number,
-  pieceLength: number,
-  totalLength: number,
+  infoHash: Buffer,
+  transferPlan: PieceTransferPlan,
 ): Promise<Buffer> {
   const parts = peerAddress.split(":");
   const ip = parts[0]!;
   const port = parseInt(parts[1]!, 10);
 
-  const torrentInfo = getTorrentInfo(torrentPath);
-  const infoHashHex = computeInfoHash(torrentInfo._rawInfo);
-  const infoHash = Buffer.from(infoHashHex, "hex");
-
   const peerId = generatePeerId();
   const handshake = buildHandshake(infoHash, peerId);
 
-  // calculate actual piece size (last piece might be small)
-  const isLastPiece = (pieceIndex + 1) * pieceLength > totalLength;
-  const actualPieceSize = isLastPiece
-    ? totalLength - pieceIndex * pieceLength
-    : pieceLength;
-
   return new Promise<Buffer>(async (resolve, reject) => {
     let receivedData = Buffer.alloc(0);
-    let pieceData = Buffer.alloc(actualPieceSize);
+    const pieceData = Buffer.alloc(transferPlan.pieceSize);
     let handshakeComplete = false;
-    let unchokedReceived = false;
     let downloadedBytes = 0;
 
     const socket = await Bun.connect({
       hostname: ip,
-      port: port,
+      port,
       socket: {
         data(socket, data) {
           receivedData = Buffer.concat([receivedData, Buffer.from(data)]);
 
-          // Handle handshake response
           if (!handshakeComplete && receivedData.length >= 68) {
             receivedData = receivedData.subarray(68);
             handshakeComplete = true;
-
-            // Send interested message
             socket.write(buildInterestedMessage());
           }
 
-          // Parse messages
           while (receivedData.length >= 4) {
             const messageLength = receivedData.readUInt32BE(0);
 
-            // Keep-alive message
             if (messageLength === 0) {
               receivedData = receivedData.subarray(4);
               continue;
             }
 
-            // Check if we have complete message
             if (receivedData.length < 4 + messageLength) break;
 
             const messageId = receivedData.readUInt8(4);
             const payload = receivedData.subarray(5, 4 + messageLength);
             receivedData = receivedData.subarray(4 + messageLength);
 
-            // Handle unchoke message
             if (messageId === MESSAGE_TYPES.UNCHOKE) {
-              unchokedReceived = true;
-
-              // Request all blocks for the piece
-              const numBlocks = Math.ceil(actualPieceSize / BLOCK_SIZE);
+              const numBlocks = Math.ceil(transferPlan.pieceSize / BLOCK_SIZE);
               for (let i = 0; i < numBlocks; i++) {
                 const begin = i * BLOCK_SIZE;
-                const length = Math.min(BLOCK_SIZE, actualPieceSize - begin);
-                socket.write(buildRequestMessage(pieceIndex, begin, length));
+                const length = Math.min(
+                  BLOCK_SIZE,
+                  transferPlan.pieceSize - begin,
+                );
+                socket.write(
+                  buildRequestMessage(transferPlan.pieceIndex, begin, length),
+                );
               }
             }
 
-            // Handle piece message
             if (messageId === MESSAGE_TYPES.PIECE) {
               const { index, begin, block } = parsePieceMessage(payload);
 
-              if (index === pieceIndex) {
+              if (index === transferPlan.pieceIndex) {
                 block.copy(pieceData, begin);
                 downloadedBytes += block.length;
 
-                // Check if download is complete
-                if (downloadedBytes >= actualPieceSize) {
+                if (downloadedBytes >= transferPlan.pieceSize) {
                   socket.end();
                   resolve(pieceData);
                 }
               }
-            }
-
-            // Handle bitfield message (ignore for now)
-            if (messageId === MESSAGE_TYPES.BITFIELD) {
-              // Peer sends available pieces, we ignore this for single piece download
             }
           }
         },
@@ -135,18 +114,40 @@ async function downloadPieceFromPeer(
           reject(error);
         },
         close(socket) {
-          if (downloadedBytes < actualPieceSize) {
+          if (downloadedBytes < transferPlan.pieceSize)
             reject(
               new Error(
-                `Connection closed before piece download completed (${downloadedBytes}/${actualPieceSize} bytes)`,
+                `Connection closed before piece download completed (${downloadedBytes}/${transferPlan.pieceSize} bytes)`,
               ),
             );
-          }
         },
       },
     });
 
     socket.write(handshake);
+  });
+}
+
+async function downloadPieceFromPeer(
+  peerAddress: string,
+  torrentPath: string,
+  pieceIndex: number,
+  pieceLength: number,
+  totalLength: number,
+): Promise<Buffer> {
+  const torrentInfo = getTorrentInfo(torrentPath);
+  const infoHashHex = computeInfoHash(torrentInfo._rawInfo);
+  const infoHash = Buffer.from(infoHashHex, "hex");
+
+  // calculate actual piece size (last piece might be small)
+  const isLastPiece = (pieceIndex + 1) * pieceLength > totalLength;
+  const actualPieceSize = isLastPiece
+    ? totalLength - pieceIndex * pieceLength
+    : pieceLength;
+
+  return requestPieceWithPeerSession(peerAddress, infoHash, {
+    pieceIndex,
+    pieceSize: actualPieceSize,
   });
 }
 
