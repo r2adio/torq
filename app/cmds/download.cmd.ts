@@ -33,6 +33,15 @@ function buildHandshake(infoHash: Buffer, peerId: Buffer): Buffer {
   return handshake;
 }
 
+function computePieceSize(
+  pieceIndex: number,
+  pieceLength: number,
+  totalLength: number,
+): number {
+  const isLastPiece = (pieceIndex + 1) * pieceLength > totalLength;
+  return isLastPiece ? totalLength - pieceIndex * pieceLength : pieceLength;
+}
+
 type PieceTransferPlan = {
   pieceIndex: number;
   pieceSize: number;
@@ -71,21 +80,20 @@ async function requestPieceWithPeerSession(
       downloadTimeoutId = null;
     };
 
-    const settleResolve = (value: Buffer) => {
+    const settle = ({ value, error }: { value?: Buffer; error?: Error }) => {
       if (isSettled) return;
       isSettled = true;
       clearTimers();
       if (socketRef) socketRef.end();
-      resolve(value);
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(value!);
     };
 
-    const settleReject = (error: Error) => {
-      if (isSettled) return;
-      isSettled = true;
-      clearTimers();
-      if (socketRef) socketRef.end();
-      reject(error);
-    };
+    const settleResolve = (value: Buffer) => settle({ value });
+    const settleReject = (error: Error) => settle({ error });
 
     const connectWithTimeout = async (): Promise<
       Awaited<ReturnType<typeof Bun.connect>>
@@ -268,30 +276,6 @@ async function requestPieceWithPeerSession(
   });
 }
 
-// computes info hash and adjust last piece size, thus req length matches torrent boundaries
-async function downloadPieceFromPeer(
-  peerAddress: string,
-  torrentPath: string,
-  pieceIndex: number,
-  pieceLength: number,
-  totalLength: number,
-): Promise<Buffer> {
-  const torrentInfo = getTorrentInfo(torrentPath);
-  const infoHashHex = computeInfoHash(torrentInfo._rawInfo);
-  const infoHash = Buffer.from(infoHashHex, "hex");
-
-  // calculate actual piece size (last piece might be small)
-  const isLastPiece = (pieceIndex + 1) * pieceLength > totalLength;
-  const actualPieceSize = isLastPiece
-    ? totalLength - pieceIndex * pieceLength
-    : pieceLength;
-
-  return requestPieceWithPeerSession(peerAddress, infoHash, {
-    pieceIndex,
-    pieceSize: actualPieceSize,
-  });
-}
-
 export const download_piece = async () => {
   if (process.argv[3] !== "-o")
     return console.error(
@@ -312,11 +296,22 @@ export const download_piece = async () => {
 
     // torrent info and piece hash from .torrent
     const torrentInfo = getTorrentDisplayInfo(torrentPath);
+    const rawTorrentInfo = getTorrentInfo(torrentPath);
+    const infoHash = Buffer.from(
+      computeInfoHash(rawTorrentInfo._rawInfo),
+      "hex",
+    );
     const expectedHash = torrentInfo.pieceHash[pieceIndex];
     if (!expectedHash)
       throw new Error(
         `Invalid piece index ${pieceIndex}. Torrent has ${torrentInfo.pieceHash.length} pieces.`,
       );
+
+    const pieceSize = computePieceSize(
+      pieceIndex,
+      torrentInfo.pieceLength,
+      torrentInfo.infoLength,
+    );
 
     // peers from tracker
     console.log("Fetching peers from tracker...");
@@ -330,13 +325,10 @@ export const download_piece = async () => {
     for (const peer of peers) {
       try {
         console.log(`Trying peer: ${peer}`);
-        pieceData = await downloadPieceFromPeer(
-          peer,
-          torrentPath,
+        pieceData = await requestPieceWithPeerSession(peer, infoHash, {
           pieceIndex,
-          torrentInfo.pieceLength,
-          torrentInfo.infoLength,
-        );
+          pieceSize,
+        });
 
         // verify piece hash
         const actualHash = crypto
