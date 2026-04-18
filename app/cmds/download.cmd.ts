@@ -276,6 +276,49 @@ async function requestPieceWithPeerSession(
   });
 }
 
+async function downloadPiece(
+  torrentPath: string,
+  pieceIndex: number,
+  peers: string[],
+  torrentInfo: ReturnType<typeof getTorrentDisplayInfo>,
+): Promise<Buffer> {
+  const rawTorrentInfo = getTorrentInfo(torrentPath);
+  const infoHash = Buffer.from(computeInfoHash(rawTorrentInfo._rawInfo), "hex");
+  const expectedHash = torrentInfo.pieceHash[pieceIndex];
+  if (!expectedHash)
+    throw new Error(
+      `Invalid piece index ${pieceIndex}. Torrent has ${torrentInfo.pieceHash.length} pieces.`,
+    );
+
+  const pieceSize = computePieceSize(
+    pieceIndex,
+    torrentInfo.pieceLength,
+    torrentInfo.infoLength,
+  );
+
+  for (const peer of peers) {
+    try {
+      console.log(`Trying peer: ${peer}`);
+      const pieceData = await requestPieceWithPeerSession(peer, infoHash, {
+        pieceIndex,
+        pieceSize,
+      });
+
+      const actualHash = crypto
+        .createHash("sha1")
+        .update(pieceData)
+        .digest("hex");
+      if (actualHash === expectedHash) return pieceData;
+      console.log(
+        `Hash mismatch from peer ${peer}. Expected: ${expectedHash}, Got: ${actualHash}`,
+      );
+    } catch (error: any) {
+      console.log(`Failed to download from ${peer}: ${error.message}`);
+    }
+  }
+  throw new Error("Failed to download piece from any peer");
+}
+
 export const download_piece = async () => {
   if (process.argv[3] !== "-o")
     return console.error(
@@ -296,23 +339,6 @@ export const download_piece = async () => {
 
     // torrent info and piece hash from .torrent
     const torrentInfo = getTorrentDisplayInfo(torrentPath);
-    const rawTorrentInfo = getTorrentInfo(torrentPath);
-    const infoHash = Buffer.from(
-      computeInfoHash(rawTorrentInfo._rawInfo),
-      "hex",
-    );
-    const expectedHash = torrentInfo.pieceHash[pieceIndex];
-    if (!expectedHash)
-      throw new Error(
-        `Invalid piece index ${pieceIndex}. Torrent has ${torrentInfo.pieceHash.length} pieces.`,
-      );
-
-    const pieceSize = computePieceSize(
-      pieceIndex,
-      torrentInfo.pieceLength,
-      torrentInfo.infoLength,
-    );
-
     // peers from tracker
     console.log("Fetching peers from tracker...");
     const peers = await getPeers(torrentPath);
@@ -320,36 +346,13 @@ export const download_piece = async () => {
 
     console.log(`Found ${peers.length} peers. Attempting download...`);
 
-    // downloads from each and every peer until success
-    let pieceData: Buffer | null = null;
-    for (const peer of peers) {
-      try {
-        console.log(`Trying peer: ${peer}`);
-        pieceData = await requestPieceWithPeerSession(peer, infoHash, {
-          pieceIndex,
-          pieceSize,
-        });
-
-        // verify piece hash
-        const actualHash = crypto
-          .createHash("sha1")
-          .update(pieceData)
-          .digest("hex");
-        if (actualHash === expectedHash) {
-          console.log("Piece downloaded and verified successfully!");
-          break;
-        } else {
-          console.log(
-            `Hash mismatch from peer ${peer}. Expected: ${expectedHash}, Got: ${actualHash}`,
-          );
-          pieceData = null;
-        }
-      } catch (error: any) {
-        console.log(`Failed to download from ${peer}: ${error.message}`);
-        continue;
-      }
-    }
-    if (!pieceData) throw new Error("Failed to download piece from any peer");
+    const pieceData = await downloadPiece(
+      torrentPath,
+      pieceIndex,
+      peers,
+      torrentInfo,
+    );
+    console.log("Piece downloaded and verified successfully!");
 
     // save downloaded piece to disk
     fs.writeFileSync(outputPath, pieceData);
