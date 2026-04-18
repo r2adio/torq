@@ -5,7 +5,7 @@ import { bufferReplacer } from "@/utils/buffer";
 export const decode = () => {
   const inputValue: string =
     process.argv[3] ?? prompt("Enter a bencoded string to decode:") ?? "";
-  if (!inputValue) (console.error("No input provided."), process.exit(1));
+  if (!inputValue) console.error("No input provided."), process.exit(1);
   try {
     const decoded = decodeBencode(Buffer.from(inputValue, "utf-8"));
     console.log("Decoded output:", JSON.stringify(decoded, bufferReplacer, 2));
@@ -18,7 +18,7 @@ export const info = () => {
   const torrentPath: string =
     process.argv[3] ?? prompt("Enter the path to torrent file:") ?? "";
   if (!torrentPath)
-    (console.error("No torrent file path provided."), process.exit(1));
+    console.error("No torrent file path provided."), process.exit(1);
   try {
     const info = getTorrentDisplayInfo(torrentPath);
     console.log(`Tracker URL: ${info.trackerUrl}`);
@@ -26,9 +26,9 @@ export const info = () => {
     console.log(`Info Hash: ${info.infoHash}`);
     console.log(`Piece Length: ${info.pieceLength}`);
     console.log(`Piece Hashes:`);
-    info.pieceHash.forEach((hash, index) =>
-      console.log(`${index + 1}: ${hash}`),
-    );
+    info.pieceHash.forEach((hash, index) => {
+      console.log(`${index + 1}: ${hash}`);
+    });
   } catch (error: any) {
     console.error("Error reading torrent file:", error.message);
   }

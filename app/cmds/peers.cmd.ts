@@ -9,7 +9,9 @@ export const peers = async () => {
       console.log("No peers found in tracker response.");
       return;
     }
-    peerList.forEach((peer) => console.log(peer));
+    peerList.forEach((peer) => {
+      console.log(peer);
+    });
   } catch (error: any) {
     console.error("Error fetching peers:", error.message);
   }

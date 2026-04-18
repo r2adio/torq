@@ -15,7 +15,9 @@ if (args.length > 0) {
   } else {
     console.log(`Unknown command: ${command}`);
     console.log("Available commands:");
-    COMMANDS.forEach((cmd) => console.log(`- ${cmd}`));
+    COMMANDS.forEach((cmd) => {
+      console.log(`- ${cmd}`);
+    });
     process.exit(1);
   }
 } else {
