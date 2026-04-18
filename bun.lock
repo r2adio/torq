@@ -5,15 +5,13 @@
     "": {
       "name": "torq",
       "dependencies": {
-        "@opentui/core": "latest",
+        "@opentui/core": "^0.1.100",
       },
       "devDependencies": {
-        "@biomejs/biome": "latest",
-        "@types/bencode": "latest",
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "latest",
+        "@biomejs/biome": "^2.4.12",
+        "@types/bencode": "^2.0.4",
+        "@types/bun": "^1.3.12",
+        "typescript": "^6.0.3",
       },
     },
   },

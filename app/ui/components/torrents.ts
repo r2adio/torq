@@ -6,7 +6,7 @@ interface Renderer {
   on(event: "destroy", cb: () => void): void;
 }
 
-export default function torrents(renderer: Renderer) {
+export default function torrents(_: Renderer) {
   return Box(
     {
       title: "/path/to/torrents",

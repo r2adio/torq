@@ -14,7 +14,7 @@ export default function meta(renderer: Renderer) {
   );
 }
 
-function details(renderer: Renderer) {
+function details(_: Renderer) {
   return Box(
     {
       title: "Details",
@@ -34,7 +34,7 @@ function details(renderer: Renderer) {
   );
 }
 
-function peer_stream(renderer: Renderer) {
+function peer_stream(_: Renderer) {
   return Box(
     {
       title: "Peer Stream       Connected: 0  Discovered: 0  Disconnected: 0",
@@ -52,7 +52,7 @@ function peer_stream(renderer: Renderer) {
   );
 }
 
-function swarm(renderer: Renderer) {
+function swarm(_: Renderer) {
   return Box(
     {
       alignItems: "stretch",

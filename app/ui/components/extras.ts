@@ -13,7 +13,7 @@ export default function extra(renderer: Renderer) {
     disk(renderer),
   );
 }
-function blocks(renderer: Renderer) {
+function blocks(_: Renderer) {
   return Box(
     {
       title: "Blocks",
@@ -28,7 +28,7 @@ function blocks(renderer: Renderer) {
   );
 }
 
-function disk(renderer: Renderer) {
+function disk(_: Renderer) {
   return Box(
     {
       title: "Disk",

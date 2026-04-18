@@ -6,7 +6,7 @@ interface Renderer {
   on(event: "destroy", cb: () => void): void;
 }
 
-export default function network(renderer: Renderer) {
+export default function network(_: Renderer) {
   return Box(
     {
       title: "Network Activity",

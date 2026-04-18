@@ -38,6 +38,7 @@ type PieceTransferPlan = {
   pieceSize: number;
 };
 
+// starts a peer session
 async function requestPieceWithPeerSession(
   peerAddress: string,
   infoHash: Buffer,
@@ -106,6 +107,7 @@ async function requestPieceWithPeerSession(
                   .toString("ascii");
                 const responseInfoHash = receivedData.subarray(28, 48);
 
+                // validate handshake fields from peer, before interested message
                 if (protocolLength !== PROTOCOL_STRING_LENGTH)
                   return settleReject(
                     new Error(`Invalid handshake pstrlen from ${peerAddress}`),
@@ -126,18 +128,17 @@ async function requestPieceWithPeerSession(
 
               while (handshakeComplete && receivedData.length >= 4) {
                 const messageLength = receivedData.readUInt32BE(0);
-
                 if (messageLength === 0) {
                   receivedData = receivedData.subarray(4);
                   continue;
                 }
-
                 if (receivedData.length < 4 + messageLength) break;
 
                 const messageId = receivedData.readUInt8(4);
                 const payload = receivedData.subarray(5, 4 + messageLength);
                 receivedData = receivedData.subarray(4 + messageLength);
 
+                // unchoke sends block req for the whole piece
                 if (messageId === MESSAGE_TYPES.UNCHOKE && !requestsSent) {
                   requestsSent = true;
                   const numBlocks = Math.ceil(
@@ -166,7 +167,6 @@ async function requestPieceWithPeerSession(
                     );
 
                   const { index, begin, block } = parsePieceMessage(payload);
-
                   if (index !== transferPlan.pieceIndex) continue;
                   if (begin < 0 || begin >= transferPlan.pieceSize)
                     return settleReject(
@@ -184,7 +184,6 @@ async function requestPieceWithPeerSession(
                     );
 
                   if (receivedBlocks.has(begin)) continue;
-
                   receivedBlocks.add(begin);
                   block.copy(pieceData, begin);
                   downloadedBytes += block.length;
@@ -230,6 +229,7 @@ async function requestPieceWithPeerSession(
         }, PEER_CONNECT_TIMEOUT_MS);
       });
 
+      // use Promise.race for connection timeout
       const socket = await Promise.race([connectPromise, timeoutPromise]);
       if (connectTimeoutId) {
         clearTimeout(connectTimeoutId);
@@ -238,6 +238,7 @@ async function requestPieceWithPeerSession(
       return socket;
     };
 
+    // applies connection timeout
     connectWithTimeout()
       .then((socket) => {
         socketRef = socket;
@@ -246,6 +247,7 @@ async function requestPieceWithPeerSession(
           return;
         }
 
+        // piece download timeout after socket connection
         downloadTimeoutId = setTimeout(() => {
           settleReject(
             new Error(
@@ -266,6 +268,7 @@ async function requestPieceWithPeerSession(
   });
 }
 
+// computes info hash and adjust last piece size, thus req length matches torrent boundaries
 async function downloadPieceFromPeer(
   peerAddress: string,
   torrentPath: string,
