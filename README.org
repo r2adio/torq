@@ -28,20 +28,38 @@ bun dev handshake sample.torrent <peer_ip>:<peer_port>
 
 # downlaod a piece from tracker
 bun dev downlaod_piece -o /tmp/test-piece sample.torrent <piece_index>
+
+# download a complete file from tracker
+bun dev download -o /tmp/out.test sample.torrent
 #+end_src
 
 ** Development
 #+begin_src bash
-# run cli
-bun run dev:cli
+# run application in terminal ui mode
+bun dev
 
-# run tests
+# run application in cli mode
+bun dev <cmd>
+
+# run the complete test suite
 bun test
 #+end_src
 
 ** Project Structure
-- ~app/main.ts~ - Entry point
-- ~app/cmds/~ - CLI commands
-- ~app/core/~ - Core torrent logic
-- ~app/utils/~ - Utilities (bencode, buffer)
-- ~app/ui/~ - UI components (TUI)
+- ~app/main.ts~  - Entry point
+- ~app/cmds/~    - CLI commands
+- ~app/core/~    - Core torrent logic
+- ~app/utils/~   - Utilities (bencode, buffer)
+- ~app/ui/~      - UI components (TUI)
+
+** Contributing
+
+Contributions are welcome! Please follow these guidelines:
+1. Fork the repository
+2. Create a feature branch (git switch -c feature/amazing-feature)
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass (bun test)
+6. Commit your changes
+7. Push to the feature branch
+8. Open a pull request
