@@ -281,9 +281,11 @@ async function downloadPiece(
   pieceIndex: number,
   peers: string[],
   torrentInfo: ReturnType<typeof getTorrentDisplayInfo>,
+  precomputedInfoHash?: Buffer,
 ): Promise<Buffer> {
-  const rawTorrentInfo = getTorrentInfo(torrentPath);
-  const infoHash = Buffer.from(computeInfoHash(rawTorrentInfo._rawInfo), "hex");
+  const infoHash =
+    precomputedInfoHash ??
+    Buffer.from(computeInfoHash(getTorrentInfo(torrentPath)._rawInfo), "hex");
   const expectedHash = torrentInfo.pieceHash[pieceIndex];
   if (!expectedHash)
     throw new Error(
@@ -367,4 +369,50 @@ export const download_piece = async () => {
   }
 };
 
-export const download = async () => {};
+export const download = async () => {
+  if (process.argv[3] !== "-o")
+    return console.error("Usage: download -o <output_path> <torrent_path>");
+
+  const outputPath: string =
+    process.argv[4] ?? prompt("Enter the output path for the downloaded file:") ?? "";
+  const torrentPath: string =
+    process.argv[5] ?? prompt("Enter the path to the torrent file:") ?? "";
+
+  try {
+    console.log("Loading torrent metadata...");
+    const torrentInfo = getTorrentDisplayInfo(torrentPath);
+    const rawTorrentInfo = getTorrentInfo(torrentPath);
+    const infoHash = Buffer.from(computeInfoHash(rawTorrentInfo._rawInfo), "hex");
+    const totalPieces = torrentInfo.pieceHash.length;
+    if (totalPieces === 0) throw new Error("Torrent contains no pieces");
+
+    console.log("Fetching peers from tracker...");
+    const peers = await getPeers(torrentPath);
+    if (peers.length === 0) throw new Error("No peers available for download");
+
+    console.log(
+      `Found ${peers.length} peers. Downloading ${totalPieces} pieces sequentially...`,
+    );
+
+    const outputFd = fs.openSync(outputPath, "w");
+    try {
+      for (let pieceIndex = 0; pieceIndex < totalPieces; pieceIndex++) {
+        console.log(`Downloading piece ${pieceIndex + 1}/${totalPieces}...`);
+        const pieceData = await downloadPiece(
+          torrentPath,
+          pieceIndex,
+          peers,
+          torrentInfo,
+          infoHash,
+        );
+        fs.writeSync(outputFd, pieceData);
+      }
+    } finally {
+      fs.closeSync(outputFd);
+    }
+
+    console.log(`Download complete. File saved to ${outputPath}`);
+  } catch (error: any) {
+    console.error("Error downloading file:", error.message);
+  }
+};
