@@ -1,6 +1,6 @@
 import fs from "fs";
 import crypto from "crypto";
-import { getTorrentInfo, getTorrentDisplayInfo } from "@/core/torrent.service";
+import { getTorrentInfo } from "@/core/torrent.service";
 import { getPeers } from "@/core/peer.service";
 import { computeInfoHash } from "@/utils/buffer";
 import {
@@ -46,6 +46,31 @@ type PieceTransferPlan = {
   pieceIndex: number;
   pieceSize: number;
 };
+
+type TorrentDownloadContext = {
+  pieceLength: number;
+  infoLength: number;
+  pieceHash: string[];
+  infoHash: Buffer;
+};
+
+function prepareTorrentDownloadContext(torrentPath: string): TorrentDownloadContext {
+  const decoded = getTorrentInfo(torrentPath);
+  const pieces = decoded.info.pieces as Buffer;
+  if (pieces.length % 20 !== 0)
+    throw new Error("Invalid pieces length in torrent file.");
+
+  const pieceHash: string[] = [];
+  for (let i = 0; i < pieces.length; i += 20)
+    pieceHash.push(pieces.subarray(i, i + 20).toString("hex"));
+
+  return {
+    pieceLength: decoded.info["piece length"],
+    infoLength: decoded.info.length,
+    pieceHash,
+    infoHash: Buffer.from(computeInfoHash(decoded._rawInfo), "hex"),
+  };
+}
 
 // starts a peer session
 async function requestPieceWithPeerSession(
@@ -277,31 +302,26 @@ async function requestPieceWithPeerSession(
 }
 
 async function downloadPiece(
-  torrentPath: string,
   pieceIndex: number,
   peers: string[],
-  torrentInfo: ReturnType<typeof getTorrentDisplayInfo>,
-  precomputedInfoHash?: Buffer,
+  torrentContext: TorrentDownloadContext,
 ): Promise<Buffer> {
-  const infoHash =
-    precomputedInfoHash ??
-    Buffer.from(computeInfoHash(getTorrentInfo(torrentPath)._rawInfo), "hex");
-  const expectedHash = torrentInfo.pieceHash[pieceIndex];
+  const expectedHash = torrentContext.pieceHash[pieceIndex];
   if (!expectedHash)
     throw new Error(
-      `Invalid piece index ${pieceIndex}. Torrent has ${torrentInfo.pieceHash.length} pieces.`,
+      `Invalid piece index ${pieceIndex}. Torrent has ${torrentContext.pieceHash.length} pieces.`,
     );
 
   const pieceSize = computePieceSize(
     pieceIndex,
-    torrentInfo.pieceLength,
-    torrentInfo.infoLength,
+    torrentContext.pieceLength,
+    torrentContext.infoLength,
   );
 
   let lastPeerError: Error | null = null;
   for (const peer of peers) {
     try {
-      const pieceData = await requestPieceWithPeerSession(peer, infoHash, {
+      const pieceData = await requestPieceWithPeerSession(peer, torrentContext.infoHash, {
         pieceIndex,
         pieceSize,
       });
@@ -344,8 +364,7 @@ export const download_piece = async () => {
   try {
     console.log("Downloading piece index:", pieceIndex);
 
-    // torrent info and piece hash from .torrent
-    const torrentInfo = getTorrentDisplayInfo(torrentPath);
+    const torrentContext = prepareTorrentDownloadContext(torrentPath);
     // peers from tracker
     console.log("Fetching peers from tracker...");
     const peers = await getPeers(torrentPath);
@@ -353,12 +372,7 @@ export const download_piece = async () => {
 
     console.log(`Found ${peers.length} peers. Attempting download...`);
 
-    const pieceData = await downloadPiece(
-      torrentPath,
-      pieceIndex,
-      peers,
-      torrentInfo,
-    );
+    const pieceData = await downloadPiece(pieceIndex, peers, torrentContext);
     console.log("Piece downloaded and verified successfully!");
 
     // save downloaded piece to disk
@@ -380,10 +394,8 @@ export const download = async () => {
 
   try {
     console.log("Loading torrent metadata...");
-    const torrentInfo = getTorrentDisplayInfo(torrentPath);
-    const rawTorrentInfo = getTorrentInfo(torrentPath);
-    const infoHash = Buffer.from(computeInfoHash(rawTorrentInfo._rawInfo), "hex");
-    const totalPieces = torrentInfo.pieceHash.length;
+    const torrentContext = prepareTorrentDownloadContext(torrentPath);
+    const totalPieces = torrentContext.pieceHash.length;
     if (totalPieces === 0) throw new Error("Torrent contains no pieces");
 
     console.log("Fetching peers from tracker...");
@@ -398,13 +410,7 @@ export const download = async () => {
     try {
       for (let pieceIndex = 0; pieceIndex < totalPieces; pieceIndex++) {
         console.log(`Downloading piece ${pieceIndex + 1}/${totalPieces}...`);
-        const pieceData = await downloadPiece(
-          torrentPath,
-          pieceIndex,
-          peers,
-          torrentInfo,
-          infoHash,
-        );
+        const pieceData = await downloadPiece(pieceIndex, peers, torrentContext);
         fs.writeSync(outputFd, pieceData);
       }
     } finally {
