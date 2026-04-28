@@ -1,4 +1,23 @@
+const renderSeparated = (items: string[]) => <text>{items.join(" | ")}</text>;
+
 export default function Footer() {
+  const metaItems = ["torq", "v0.0.1", "1 FPS", "theme"];
+  const actionItems = [
+    "[arrow] nav",
+    "[Q]uit",
+    "[Paste]paste",
+    "[p]ause",
+    "[a]dd",
+    "[f]iles",
+    "[d]elete",
+    "[t]ime",
+    "[s]ort",
+    "[t]ime",
+    "[g]raph",
+    "[m]anual",
+  ];
+  const statusItems = ["Port: 42069", "IPv4/IPv6", "Closed"];
+
   return (
     <box
       flexDirection="row"
@@ -6,24 +25,14 @@ export default function Footer() {
       justifyContent="space-between"
       flexGrow={1}
     >
-      <box>
-        <text>torq</text>
+      <box flexDirection="row" gap={1}>
+        {renderSeparated(metaItems)}
       </box>
-      <box flexDirection="row" gap={5}>
-        <text>↑ ↓ ← → navigate</text>
-        <text>[q]uit</text>
-        <text>[v]paste</text>
-        <text>[p]ause/resume</text>
-        <text>[d]elete</text>
-        <text>[s]ort</text>
-        <text>[c]onfig</text>
-        <text>[t]ime</text>
-        <text>[/]search</text>
-        <text>[m]anual</text>
+      <box flexDirection="row" gap={1}>
+        {renderSeparated(actionItems)}
       </box>
-      <box flexDirection="row" gap={2}>
-        <text>Port: 42069</text>
-        <text>v0.1.0</text>
+      <box flexDirection="row" gap={1}>
+        {renderSeparated(statusItems)}
       </box>
     </box>
   );
