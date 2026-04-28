@@ -1,22 +1,56 @@
-const renderSeparated = (items: string[]) => <text>{items.join(" | ")}</text>;
+type FooterSegment = {
+  label: string;
+  fg?: string;
+};
+
+type FooterItem = FooterSegment & {
+  segments?: FooterSegment[];
+};
+
+const separator = " | ";
+
+const renderSegment = (segment: FooterSegment) => (
+  <text fg={segment.fg}>{segment.label}</text>
+);
+
+const renderItem = (item: FooterItem) =>
+  item.segments ? item.segments.map(renderSegment) : [renderSegment(item)];
+
+const renderSeparated = (items: FooterItem[]) =>
+  items.flatMap((item, index) => [
+    ...renderItem(item),
+    ...(index < items.length - 1 ? [<text>{separator}</text>] : []),
+  ]);
 
 export default function Footer() {
-  const metaItems = ["torq", "v0.0.1", "1 FPS", "theme"];
-  const actionItems = [
-    "[arrow] nav",
-    "[Q]uit",
-    "[Paste]paste",
-    "[p]ause",
-    "[a]dd",
-    "[f]iles",
-    "[d]elete",
-    "[t]ime",
-    "[s]ort",
-    "[t]ime",
-    "[g]raph",
-    "[m]anual",
+  const metaItems = [
+    { label: "torq", fg: "#ffffff" },
+    { label: "v0.0.1", fg: "#808080" },
+    { label: "1 FPS", fg: "#ffd54f" },
+    { label: "theme" },
   ];
-  const statusItems = ["Port: 42069", "IPv4/IPv6", "Closed"];
+  const actionItems = [
+    {
+      label: "",
+      segments: [{ label: "[arrow]", fg: "#00ff00" }, { label: " nav" }],
+    },
+    { label: "[Q]uit" },
+    { label: "[Paste]paste" },
+    { label: "[p]ause" },
+    { label: "[a]dd" },
+    { label: "[f]iles" },
+    { label: "[d]elete" },
+    { label: "[t]ime" },
+    { label: "[s]ort" },
+    { label: "[t]ime" },
+    { label: "[g]raph" },
+    { label: "[m]anual" },
+  ];
+  const statusItems = [
+    { label: "Port: 42069" },
+    { label: "IPv4/IPv6" },
+    { label: "Closed" },
+  ];
 
   return (
     <box
