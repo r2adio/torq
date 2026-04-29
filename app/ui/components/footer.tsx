@@ -1,3 +1,5 @@
+import { RGBA } from "@opentui/core";
+
 type FooterSegment = {
   label: string;
   fg?: string;
@@ -6,9 +8,10 @@ type FooterSegment = {
 type FooterItem = FooterSegment | { segments: FooterSegment[] };
 
 const separator = " | ";
+const defaultFg = RGBA.defaultForeground();
 
 const renderSegment = (segment: FooterSegment) => (
-  <text fg={segment.fg}>{segment.label}</text>
+  <text fg={segment.fg ?? defaultFg}>{segment.label}</text>
 );
 
 const renderItem = (item: FooterItem) =>
@@ -17,7 +20,9 @@ const renderItem = (item: FooterItem) =>
 const renderSeparated = (items: FooterItem[]) =>
   items.flatMap((item, index) => [
     ...renderItem(item),
-    ...(index < items.length - 1 ? [<text>{separator}</text>] : []),
+    ...(index < items.length - 1
+      ? [<text fg={defaultFg}>{separator}</text>]
+      : []),
   ]);
 
 export default function Footer() {
