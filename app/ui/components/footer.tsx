@@ -1,8 +1,8 @@
-import { RGBA } from "@opentui/core";
+import { RGBA, type ColorInput } from "@opentui/core";
 
 type FooterSegment = {
   label: string;
-  fg?: string;
+  fg?: ColorInput;
 };
 
 type FooterItem = FooterSegment | { segments: FooterSegment[] };
@@ -28,30 +28,29 @@ const renderSeparated = (items: FooterItem[]) =>
 export default function Footer() {
   const metaItems = [
     { label: "torq", fg: "#ffffff" },
-    { label: "v0.0.1", fg: "#808080" },
-    { label: "1 FPS", fg: "#ffd54f" },
-    { label: "theme" },
+    { label: "v0.0.1", fg: "gray" },
+    { label: "1 FPS", fg: "orange" },
+    // { label: "Gruvbox Dark", fg: "white" },
+    // { label: "Gruvbox Dark", fg: `${RGBA.fromIndex(7)}` },
+    { label: "Gruvbox Dark", fg: RGBA.fromIndex(7) },
   ];
   const actionItems = [
-    {
-      segments: [{ label: "[arrow]", fg: "#00ff00" }, { label: " nav" }],
-    },
-    { label: "[Q]uit" },
-    { label: "[Paste]paste" },
-    { label: "[p]ause" },
-    { label: "[a]dd" },
-    { label: "[f]iles" },
-    { label: "[d]elete" },
-    { label: "[t]ime" },
-    { label: "[s]ort" },
-    { label: "[t]ime" },
-    { label: "[g]raph" },
-    { label: "[m]anual" },
+    { segments: [{ label: "[arrow]", fg: "green" }, { label: " nav" }] },
+    { segments: [{ label: "[Q]", fg: "green" }, { label: "uit" }] },
+    { segments: [{ label: "[Paste]", fg: "green" }, { label: "paste" }] },
+    { segments: [{ label: "[p]", fg: "green" }, { label: "ause" }] },
+    { segments: [{ label: "[a]", fg: "green" }, { label: "dd" }] },
+    { segments: [{ label: "[f]", fg: "green" }, { label: "iles" }] },
+    { segments: [{ label: "[d]", fg: "green" }, { label: "elete" }] },
+    { segments: [{ label: "[s]", fg: "green" }, { label: "ort" }] },
+    { segments: [{ label: "[t]", fg: "green" }, { label: "ime" }] },
+    { segments: [{ label: "[g]", fg: "green" }, { label: "raph" }] },
+    { segments: [{ label: "[m]", fg: "teal" }, { label: "anual" }] },
   ];
   const statusItems = [
-    { label: "Port: 42069" },
-    { label: "IPv4/IPv6" },
-    { label: "Closed" },
+    { label: "Port: 42069", fg: "gray" },
+    { label: "IPv4/IPv6", fg: "gray" },
+    { label: "Closed", fg: "gray" },
   ];
 
   return (
