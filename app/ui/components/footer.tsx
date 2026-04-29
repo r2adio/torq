@@ -3,9 +3,7 @@ type FooterSegment = {
   fg?: string;
 };
 
-type FooterItem = FooterSegment & {
-  segments?: FooterSegment[];
-};
+type FooterItem = FooterSegment | { segments: FooterSegment[] };
 
 const separator = " | ";
 
@@ -14,7 +12,7 @@ const renderSegment = (segment: FooterSegment) => (
 );
 
 const renderItem = (item: FooterItem) =>
-  item.segments ? item.segments.map(renderSegment) : [renderSegment(item)];
+  "segments" in item ? item.segments.map(renderSegment) : [renderSegment(item)];
 
 const renderSeparated = (items: FooterItem[]) =>
   items.flatMap((item, index) => [
@@ -31,7 +29,6 @@ export default function Footer() {
   ];
   const actionItems = [
     {
-      label: "",
       segments: [{ label: "[arrow]", fg: "#00ff00" }, { label: " nav" }],
     },
     { label: "[Q]uit" },
@@ -59,13 +56,13 @@ export default function Footer() {
       justifyContent="space-between"
       flexGrow={1}
     >
-      <box flexDirection="row" gap={1}>
+      <box flexDirection="row" gap={0}>
         {renderSeparated(metaItems)}
       </box>
-      <box flexDirection="row" gap={1}>
+      <box flexDirection="row" gap={0}>
         {renderSeparated(actionItems)}
       </box>
-      <box flexDirection="row" gap={1}>
+      <box flexDirection="row" gap={0}>
         {renderSeparated(statusItems)}
       </box>
     </box>
