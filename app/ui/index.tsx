@@ -1,4 +1,11 @@
 import { render } from "@opentui/solid";
-import { Footer } from "@/ui/components";
+import { Footer, Torrents } from "@/ui/components";
 
-render(() => <Footer />);
+const App = () => (
+  <box flexDirection="column" flexGrow={1}>
+    <Torrents />
+    <Footer />
+  </box>
+);
+
+render(App);
