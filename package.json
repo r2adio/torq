@@ -4,7 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "bun build --compile ./app/main.ts --outfile torq",
+    "build": "bun run app/build.ts",
     "dev": "bun run --hot app/main.ts",
     "test": "bun test"
   },

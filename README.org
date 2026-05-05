@@ -43,6 +43,9 @@ bun dev <cmd>
 
 # run the complete test suite
 bun test
+
+# build a standalone executable
+bun run build
 #+end_src
 
 ** Project Structure
