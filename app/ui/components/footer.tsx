@@ -58,56 +58,83 @@ export default function Footer() {
   const metaItems = [
     { label: "torq", fg: "#ffffff" },
     { label: "v0.0.1", fg: "gray" },
-    { label: "1 FPS", fg: "orange" },
+    { label: "1 FPS", fg: RGBA.fromIndex(214) },
     // { label: "Gruvbox Dark", fg: "white" },
     // { label: "Gruvbox Dark", fg: `${RGBA.fromIndex(7)}` },
-    { label: "Gruvbox Dark", fg: RGBA.fromIndex(7) },
+    { label: "Gruvbox Dark", fg: RGBA.fromIndex(175) },
   ];
   const actionItems = [
     {
       segments: [
-        { label: "[arrow]", fg: "green", keyId: "arrow" },
+        { label: "[arrow]", fg: RGBA.fromIndex(66), keyId: "arrow" },
         { label: " nav" },
       ],
     },
     {
-      segments: [{ label: "[Q]", fg: "green", keyId: "q" }, { label: "uit" }],
+      segments: [
+        { label: "[Q]", fg: RGBA.fromIndex(124), keyId: "q" },
+        { label: "uit" },
+      ],
     },
     {
       segments: [
-        { label: "[Paste]", fg: "green", keyId: "paste" },
+        { label: "[Paste]", fg: RGBA.fromIndex(108), keyId: "paste" },
         { label: "paste" },
       ],
     },
     {
-      segments: [{ label: "[p]", fg: "green", keyId: "p" }, { label: "ause" }],
+      segments: [
+        { label: "[p]", fg: RGBA.fromIndex(142), keyId: "p" },
+        { label: "ause" },
+      ],
     },
     {
-      segments: [{ label: "[a]", fg: "green", keyId: "a" }, { label: "dd" }],
+      segments: [
+        { label: "[a]", fg: RGBA.fromIndex(142), keyId: "a" },
+        { label: "dd" },
+      ],
     },
     {
-      segments: [{ label: "[f]", fg: "green", keyId: "f" }, { label: "iles" }],
+      segments: [
+        { label: "[f]", fg: RGBA.fromIndex(108), keyId: "f" },
+        { label: "iles" },
+      ],
     },
     {
-      segments: [{ label: "[d]", fg: "green", keyId: "d" }, { label: "elete" }],
+      segments: [
+        { label: "[d]", fg: RGBA.fromIndex(214), keyId: "d" },
+        { label: "elete" },
+      ],
     },
     {
-      segments: [{ label: "[s]", fg: "green", keyId: "s" }, { label: "ort" }],
+      segments: [
+        { label: "[s]", fg: RGBA.fromIndex(175), keyId: "s" },
+        { label: "ort" },
+      ],
     },
     {
-      segments: [{ label: "[t]", fg: "green", keyId: "t" }, { label: "ime" }],
+      segments: [
+        { label: "[t]", fg: RGBA.fromIndex(66), keyId: "t" },
+        { label: "ime" },
+      ],
     },
     {
-      segments: [{ label: "[g]", fg: "green", keyId: "g" }, { label: "raph" }],
+      segments: [
+        { label: "[g]", fg: RGBA.fromIndex(214), keyId: "g" },
+        { label: "raph" },
+      ],
     },
     {
-      segments: [{ label: "[m]", fg: "teal", keyId: "m" }, { label: "anual" }],
+      segments: [
+        { label: "[m]", fg: RGBA.fromIndex(108), keyId: "m" },
+        { label: "anual" },
+      ],
     },
   ];
   const statusItems = [
-    { label: "Port: 42069", fg: "gray" },
-    { label: "IPv4/IPv6", fg: "gray" },
-    { label: "Closed", fg: "gray" },
+    { label: "Port: 42069", fg: RGBA.fromIndex(246) },
+    { label: "IPv4/IPv6", fg: RGBA.fromIndex(246) },
+    { label: "Closed", fg: RGBA.fromIndex(246) },
   ];
 
   return (
