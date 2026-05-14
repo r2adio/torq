@@ -1,8 +1,8 @@
 import Footer from "./footer";
-import stats from "./stats";
-import network from "./network";
-import extras from "./extras";
+import Stats from "./stats";
+import Network from "./network";
+import Extras from "./extras";
 import Torrents from "./torrents";
-import meta from "./meta";
+import Meta from "./meta";
 
-export { Footer, stats, network, extras, Torrents, meta };
+export { Footer, Stats, Network, Extras, Torrents, Meta };

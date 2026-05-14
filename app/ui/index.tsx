@@ -1,5 +1,12 @@
 import { render, useKeyboard, useRenderer } from "@opentui/solid";
-import { Footer, Torrents } from "@/ui/components";
+import {
+  Extras,
+  Footer,
+  Meta,
+  Network,
+  Stats,
+  Torrents,
+} from "@/ui/components";
 
 const App = () => {
   const renderer = useRenderer();
@@ -8,7 +15,15 @@ const App = () => {
   });
   return (
     <box flexDirection="column" flexGrow={1}>
-      <Torrents />
+      <box flexDirection="row" gap={1} flexGrow={3}>
+        <Torrents />
+        <Meta />
+      </box>
+      <box flexDirection="row" gap={1} flexGrow={5}>
+        <Network />
+        <Extras />
+        <Stats />
+      </box>
       <Footer />
     </box>
   );

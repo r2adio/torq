@@ -132,9 +132,9 @@ export default function Footer() {
     },
   ];
   const statusItems = [
-    { label: "Port: 42069", fg: RGBA.fromIndex(246) },
+    { label: "Port 6881", fg: RGBA.fromIndex(246) },
     { label: "IPv4/IPv6", fg: RGBA.fromIndex(246) },
-    { label: "Closed", fg: RGBA.fromIndex(246) },
+    { label: "CLOSED", fg: RGBA.fromIndex(246) },
   ];
 
   return (

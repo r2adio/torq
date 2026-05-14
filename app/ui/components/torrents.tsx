@@ -1,16 +1,15 @@
 export default function Torrents() {
   return (
     <box
-      title="/path/to/torrents"
+      title="Name"
       alignItems="stretch"
       justifyContent="flex-start"
       position="static"
-      maxHeight={21}
-      width="45%"
+      flexGrow={4}
       border={true}
-      borderColor="grey"
+      borderColor={"#f2a2b6"}
     >
-      <text fg="white">Name</text>
+      <text fg="#f2a2b6">Name ▲</text>
       <text fg="white">Torrent 1: </text>
       <text fg="white">Torrent 2: </text>
       <text fg="white">Torrent 3: </text>
