@@ -1,8 +1,11 @@
 import { getPeers, performHandshake } from "@/core/peer.service";
 
 export const peers = async () => {
-  const torrentPath: string =
-    process.argv[3] ?? prompt("Enter the path to the torrent file:") ?? "";
+  const torrentPath: string = process.argv[3] ?? "";
+  if (!torrentPath) {
+    console.error("Usage: peers <torrent_path>");
+    process.exit(1);
+  }
   try {
     const peerList = await getPeers(torrentPath);
     if (!peerList.length) {
@@ -18,10 +21,12 @@ export const peers = async () => {
 };
 
 export const handshake = async () => {
-  const torrentPath: string =
-    process.argv[3] ?? prompt("Enter the path to the torrent file:") ?? "";
-  const peerAddress: string =
-    process.argv[4] ?? prompt("Enter the peer address (ip:port):") ?? "";
+  const torrentPath: string = process.argv[3] ?? "";
+  const peerAddress: string = process.argv[4] ?? "";
+  if (!torrentPath || !peerAddress) {
+    console.error("Usage: handshake <torrent_path> <peer_ip:peer_port>");
+    process.exit(1);
+  }
   try {
     const peerId = await performHandshake(torrentPath, peerAddress);
     console.log(`Peer ID: ${peerId}`);

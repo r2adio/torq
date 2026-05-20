@@ -1,5 +1,5 @@
 * torq
-A BitTorrent client implementation in TypeScript using Bun.
+A BitTorrent client implementation in TypeScript using Node.js.
 
 ** Features
 - *Decode* - Decode bencoded strings
@@ -9,43 +9,34 @@ A BitTorrent client implementation in TypeScript using Bun.
 
 ** Installation
 #+begin_src bash
-bun install
+pnpm install
 #+end_src
 
 ** Usage
 #+begin_src bash
-# opens the terminal ui
-bun dev
-
 # display torrent file info
-bun dev info sample.torrent
+pnpm dev info sample.torrent
 
 # discover peers from tracker
-bun dev peers sample.torrent
+pnpm dev peers sample.torrent
 
 # perform peer handshake with tracker
-bun dev handshake sample.torrent <peer_ip>:<peer_port>
+pnpm dev handshake sample.torrent <peer_ip>:<peer_port>
 
 # downlaod a piece from tracker
-bun dev downlaod_piece -o /tmp/test-piece sample.torrent <piece_index>
+pnpm dev downlaod_piece -o /tmp/test-piece sample.torrent <piece_index>
 
 # download a complete file from tracker
-bun dev download -o /tmp/out.test sample.torrent
+pnpm dev download -o /tmp/out.test sample.torrent
 #+end_src
 
 ** Development
 #+begin_src bash
-# run application in terminal ui mode
-bun dev
-
 # run application in cli mode
-bun dev <cmd>
+pnpm dev <cmd>
 
 # run the complete test suite
-bun test
-
-# build a standalone executable
-bun run build
+npm test
 #+end_src
 
 ** Project Structure
@@ -62,7 +53,7 @@ Contributions are welcome! Please follow these guidelines:
 2. Create a feature branch (git switch -c feature/amazing-feature)
 3. Make your changes
 4. Add tests for new functionality
-5. Ensure all tests pass (bun test)
+5. Ensure all tests pass (npm test)
 6. Commit your changes
 7. Push to the feature branch
 8. Open a pull request

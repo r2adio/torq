@@ -1,3 +1,4 @@
+import net from "net";
 import { getTorrentInfo, getTorrentDisplayInfo } from "@/core/torrent.service";
 import { computeInfoHash } from "@/utils/buffer";
 import { decodeBencode } from "@/utils/bencode";
@@ -42,7 +43,7 @@ export async function performHandshake(
   const peerId = generatePeerId();
   const handshake = buildHandshake(infoHash, peerId);
 
-  return new Promise<string>(async (resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     let isSettled = false;
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
@@ -57,40 +58,38 @@ export async function performHandshake(
     };
 
     try {
-      const socket = await Bun.connect({
-        hostname: ip,
-        port: port,
-        socket: {
-          data(socket, data) {
-            if (data.length >= 68) {
-              const receivedPeerId = data.subarray(48, 68);
-              const peerIdHex = receivedPeerId.toString("hex");
-              socket.end();
-              settle((value) => resolve(value as string), peerIdHex);
-            }
-          },
-          error(socket, error) {
-            socket.end();
-            settle(
-              (value) => reject(value),
-              new Error(
-                `Peer connection error for ${peerAddress}: ${error.message}`,
-              ),
-            );
-          },
-          close() {
-            settle(
-              (value) => reject(value),
-              new Error(
-                `Connection closed before handshake completed for ${peerAddress}`,
-              ),
-            );
-          },
-        },
+      const socket = net.connect({ host: ip, port });
+      socket.once("data", (data) => {
+        if (data.length >= 68) {
+          const receivedPeerId = data.subarray(48, 68);
+          const peerIdHex = receivedPeerId.toString("hex");
+          socket.end();
+          settle((value) => resolve(value as string), peerIdHex);
+        }
+      });
+      socket.once("error", (error) => {
+        socket.end();
+        settle(
+          (value) => reject(value),
+          new Error(
+            `Peer connection error for ${peerAddress}: ${error.message}`,
+          ),
+        );
+      });
+      socket.once("close", () => {
+        settle(
+          (value) => reject(value),
+          new Error(
+            `Connection closed before handshake completed for ${peerAddress}`,
+          ),
+        );
+      });
+      socket.once("connect", () => {
+        socket.write(handshake);
       });
 
       timeoutId = setTimeout(() => {
-        socket.end();
+        socket.destroy();
         settle(
           (value) => reject(value),
           new Error(
@@ -98,8 +97,6 @@ export async function performHandshake(
           ),
         );
       }, CONNECT_TIMEOUT_MS);
-
-      socket.write(handshake);
     } catch (error: any) {
       settle(
         (value) => reject(value),
