@@ -1,32 +1,31 @@
-import { render, useKeyboard, useRenderer } from "@opentui/solid";
-import {
-  Extras,
-  Footer,
-  Meta,
-  Network,
-  Stats,
-  Torrents,
-} from "@/ui/components";
+import { createNodeApp } from "@rezi-ui/node";
+import { Button, Page, Panel, Row, Spacer, Text } from "@rezi-ui/jsx";
 
-const App = () => {
-  const renderer = useRenderer();
-  useKeyboard((key) => {
-    if (key.name === "q") renderer.destroy();
-  });
-  return (
-    <box flexDirection="column" flexGrow={1}>
-      <box flexDirection="row" gap={1} flexGrow={3}>
-        <Torrents />
-        <Meta />
-      </box>
-      <box flexDirection="row" gap={1} flexGrow={5}>
-        <Network />
-        <Extras />
-        <Stats />
-      </box>
-      <Footer />
-    </box>
-  );
-};
+type State = { count: number };
 
-render(App);
+const app = createNodeApp<State>({
+  initialState: { count: 0 },
+});
+
+app.view((state) => (
+  <Page
+    p={1}
+    gap={1}
+    body={
+      <Panel title="Counter">
+        <Row gap={1} items="center">
+          <Text variant="heading">Count: {state.count}</Text>
+          <Spacer flex={1} />
+          <Button id="dec" label="-1" intent="secondary" />
+          <Button id="inc" label="+1" intent="primary" />
+        </Row>
+      </Panel>
+    }
+  />
+));
+
+app.keys({
+  q: () => app.stop(),
+});
+
+await app.start();

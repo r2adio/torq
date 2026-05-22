@@ -4,17 +4,20 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "tsx app/main.ts",
+    "dev": "tsx watch app/main.ts",
     "test": "node --test",
     "lint": "pnpx @biomejs/biome check"
   },
   "devDependencies": {
-    "typescript": "^6.0.3",
     "@biomejs/biome": "^2.4.13",
     "@types/bencode": "^2.0.4",
     "@types/node": "^24.1.0",
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.5",
+    "typescript": "^6.0.3"
   },
-  "peerDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "@rezi-ui/core": "0.1.0-alpha.72",
+    "@rezi-ui/jsx": "0.1.0-alpha.72",
+    "@rezi-ui/node": "0.1.0-alpha.72"
+  }
 }

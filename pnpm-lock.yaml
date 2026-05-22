@@ -7,6 +7,16 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@rezi-ui/core':
+        specifier: 0.1.0-alpha.72
+        version: 0.1.0-alpha.72
+      '@rezi-ui/jsx':
+        specifier: 0.1.0-alpha.72
+        version: 0.1.0-alpha.72
+      '@rezi-ui/node':
+        specifier: 0.1.0-alpha.72
+        version: 0.1.0-alpha.72
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.4.13
@@ -239,11 +249,30 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@rezi-ui/core@0.1.0-alpha.72':
+    resolution: {integrity: sha512-CTQTgWINUpgYtsfDtDk61TztNQGjyITIW+mApi4MxyacwEEtlMgcPKdtOGe3d6Lfj1uBiytQnvRq6DqIiwbN0g==}
+    engines: {bun: '>=1.3.0', node: '>=18'}
+
+  '@rezi-ui/jsx@0.1.0-alpha.72':
+    resolution: {integrity: sha512-4aaMYmdup+aRLe70rnZRiy7I5WEHjGWHQvFda9IpsxjAkrCbmr9HvPNabyLFCcUKmj/ociD75IrvbejGFeZcSA==}
+    engines: {bun: '>=1.3.0', node: '>=18'}
+
+  '@rezi-ui/native@0.1.0-alpha.72':
+    resolution: {integrity: sha512-7F0hFt93NYr5Ne+fGhS7soWs2vJafjPij2eGHYE9dWgHcQTRnBMO4AmqTUz09pXs1gy5RQwlZq3DrAqxC3HA3A==}
+    engines: {bun: '>=1.3.0', node: '>=18'}
+
+  '@rezi-ui/node@0.1.0-alpha.72':
+    resolution: {integrity: sha512-Oi6kBgPQqFI7mM9XMxaojFxTeZCzTc5lezg/z4PCA5X1jTcT44YL9/xuQZJHImdZYv8IRaL8j4/KZowPabWQMA==}
+    engines: {bun: '>=1.3.0', node: '>=18'}
+
   '@types/bencode@2.0.4':
     resolution: {integrity: sha512-sirDu3HUSG7jZMlhTDvCzSFiPR4lkUYBQA75CoMi6DEf2alFZWJWtHgfjBbb9PachPZhPMB1IlH09deyMNBipQ==}
 
   '@types/node@24.12.4':
     resolution: {integrity: sha512-GUUEShf+PBCGW2KaXwcIt3Yk+e3pkKwWKb9GSyM9WQVE+ep2jzmHdGsHzu4wgcZy5fN9FBdVzjpBQsYlpfpgLA==}
+
+  '@xterm/headless@6.0.0':
+    resolution: {integrity: sha512-5Yj1QINYCyzrZtf8OFIHi47iQtI+0qYFPHmouEfG8dHNxbZ9Tb9YGSuLcsEwj9Z+OL75GJqPyJbyoFer80a2Hw==}
 
   esbuild@0.28.0:
     resolution: {integrity: sha512-sNR9MHpXSUV/XB4zmsFKN+QgVG82Cc7+/aaxJ8Adi8hyOac+EXptIp45QBPaVyX3N70664wRbTcLTOemCAnyqw==}
@@ -254,6 +283,12 @@ packages:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
+
+  node-addon-api@7.1.1:
+    resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
+
+  node-pty@1.1.0:
+    resolution: {integrity: sha512-20JqtutY6JPXTUnL0ij1uad7Qe1baT46lyolh2sSENDd4sTzKZ4nmAFkeAARDKwmlLjPx6XKRlwRUxwjOy+lUg==}
 
   tsx@4.22.3:
     resolution: {integrity: sha512-mdoNxBC/cSQObGGVQ5Bpn5i+yv7j68gk3Nfm3wFjcJg3Z0Mix9jzAFfP12prmm5eVGmDKtp0yyArrs0Q+8gZHg==}
@@ -383,6 +418,21 @@ snapshots:
   '@esbuild/win32-x64@0.28.0':
     optional: true
 
+  '@rezi-ui/core@0.1.0-alpha.72': {}
+
+  '@rezi-ui/jsx@0.1.0-alpha.72':
+    dependencies:
+      '@rezi-ui/core': 0.1.0-alpha.72
+
+  '@rezi-ui/native@0.1.0-alpha.72': {}
+
+  '@rezi-ui/node@0.1.0-alpha.72':
+    dependencies:
+      '@rezi-ui/core': 0.1.0-alpha.72
+      '@rezi-ui/native': 0.1.0-alpha.72
+      '@xterm/headless': 6.0.0
+      node-pty: 1.1.0
+
   '@types/bencode@2.0.4':
     dependencies:
       '@types/node': 24.12.4
@@ -390,6 +440,8 @@ snapshots:
   '@types/node@24.12.4':
     dependencies:
       undici-types: 7.16.0
+
+  '@xterm/headless@6.0.0': {}
 
   esbuild@0.28.0:
     optionalDependencies:
@@ -422,6 +474,12 @@ snapshots:
 
   fsevents@2.3.3:
     optional: true
+
+  node-addon-api@7.1.1: {}
+
+  node-pty@1.1.0:
+    dependencies:
+      node-addon-api: 7.1.1
 
   tsx@4.22.3:
     dependencies:

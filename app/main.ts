@@ -1,8 +1,11 @@
 import { COMMANDS } from "@/cmds";
 
 const argv = process.argv;
-const scriptIndex = argv.findIndex((arg) =>
-  arg.endsWith("app/main.ts") || arg.endsWith("app/main.js") || arg.endsWith("app/main.mjs"),
+const scriptIndex = argv.findIndex(
+  (arg) =>
+    arg.endsWith("app/main.ts") ||
+    arg.endsWith("app/main.js") ||
+    arg.endsWith("app/main.mjs"),
 );
 const argsStart = scriptIndex >= 0 ? scriptIndex + 1 : 2;
 const args = argv.slice(argsStart);
@@ -27,9 +30,9 @@ if (args.length > 0) {
     process.exit(1);
   }
 } else {
-  console.log("No command provided.");
-  console.log("Available commands:");
-  COMMANDS.forEach((cmd) => {
-    console.log(`- ${cmd}`);
-  });
+  import("@/ui");
+  // import("@/ui").catch((err) => {
+  // console.error("Failed to run TUI:", err);
+  // process.exit(1);
+  // }
 }
