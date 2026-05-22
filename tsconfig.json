@@ -30,5 +30,6 @@
 
     "baseUrl": ".",
     "paths": { "@/*": ["./app/*"] },
-  }
+  },
+  "include": ["app/**/*.ts", "app/**/*.tsx"]
 }

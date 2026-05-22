@@ -1,31 +1,40 @@
 import { createNodeApp } from "@rezi-ui/node";
-import { Button, Page, Panel, Row, Spacer, Text } from "@rezi-ui/jsx";
+import { Column, Header, Panel, Row, StatusBar, Text } from "@rezi-ui/jsx";
+import { actions } from "@/ui/actions";
+import { createInitialState } from "@/ui/state";
+import { ActivityPanel } from "@/ui/components/ActivityPanel";
+import { QuickActions } from "@/ui/components/QuickActions";
+import { StatsCard } from "@/ui/components/StatsCard";
+import { HomeScreen } from "@/ui/screens/HomeScreen";
 
-type State = { count: number };
-
-const app = createNodeApp<State>({
-  initialState: { count: 0 },
+const app = createNodeApp({
+  initialState: createInitialState(),
 });
 
 app.view((state) => (
-  <Page
-    p={1}
-    gap={1}
-    body={
-      <Panel title="Counter">
-        <Row gap={1} items="center">
-          <Text variant="heading">Count: {state.count}</Text>
-          <Spacer flex={1} />
-          <Button id="dec" label="-1" intent="secondary" />
-          <Button id="inc" label="+1" intent="primary" />
+  <Column gap={1} p={1}>
+    <Header title="Torq" subtitle="Rezi UI starter layout" />
+    <Row gap={1}>
+      <Column gap={1} flex={1}>
+        <Panel title="Quick Actions">
+          <QuickActions actions={state.actions} />
+        </Panel>
+      </Column>
+      <Column gap={1} flex={3}>
+        <Row gap={1}>
+          <StatsCard stats={state.stats} />
+          <ActivityPanel entries={state.activity} />
         </Row>
-      </Panel>
-    }
-  />
+        <HomeScreen greeting={state.greeting} />
+      </Column>
+    </Row>
+    <StatusBar
+      left={[<Text key="status">Ready</Text>]}
+      right={[<Text key="hint">Press q to quit</Text>]}
+    />
+  </Column>
 ));
 
-app.keys({
-  q: () => app.stop(),
-});
+actions.registerGlobalKeys(app);
 
 await app.start();
