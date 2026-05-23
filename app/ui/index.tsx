@@ -12,7 +12,7 @@ const app = createNodeApp({
 });
 
 app.view((state) => (
-  <Column gap={1} p={1}>
+  <Column gap={1} pb={1}>
     <Header title="Torq" subtitle="Rezi UI starter layout" />
     <Row gap={1}>
       <Column gap={1} flex={1}>

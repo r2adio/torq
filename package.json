@@ -9,10 +9,10 @@
     "lint": "pnpx @biomejs/biome check"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.13",
+    "@biomejs/biome": "^2.4.15",
     "@types/bencode": "^2.0.4",
-    "@types/node": "^24.1.0",
-    "tsx": "^4.20.5",
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.3"
   },
   "dependencies": {
