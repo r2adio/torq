@@ -1,4 +1,4 @@
-import { getPeers, performHandshake } from "@/core/peer.service";
+import { engine } from "@/engine";
 
 export const peers = async () => {
   const torrentPath: string = process.argv[3] ?? "";
@@ -7,7 +7,7 @@ export const peers = async () => {
     process.exit(1);
   }
   try {
-    const peerList = await getPeers(torrentPath);
+    const peerList = await engine.fetchPeers(torrentPath);
     if (!peerList.length) {
       console.log("No peers found in tracker response.");
       return;
@@ -28,7 +28,7 @@ export const handshake = async () => {
     process.exit(1);
   }
   try {
-    const peerId = await performHandshake(torrentPath, peerAddress);
+    const peerId = await engine.handshakeWithPeer(torrentPath, peerAddress);
     console.log(`Peer ID: ${peerId}`);
   } catch (error: any) {
     console.error("Error during handshake:", error.message);

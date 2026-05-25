@@ -1,4 +1,4 @@
-import { getTorrentDisplayInfo } from "@/core/torrent.service";
+import { engine } from "@/engine";
 import { decodeBencode } from "@/utils/bencode";
 import { bufferReplacer } from "@/utils/buffer";
 
@@ -23,7 +23,7 @@ export const info = () => {
     process.exit(1);
   }
   try {
-    const info = getTorrentDisplayInfo(torrentPath);
+    const info = engine.getTorrentSummary(torrentPath);
     console.log(`Tracker URL: ${info.trackerUrl}`);
     console.log(`Length: ${info.infoLength}`);
     console.log(`Info Hash: ${info.infoHash}`);
