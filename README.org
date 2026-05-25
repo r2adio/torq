@@ -14,33 +14,37 @@ pnpm install
 
 ** Usage
 #+begin_src bash
+# launch the terminal UI
+pnpm dev
+
 # display torrent file info
-pnpm dev info sample.torrent
+pnpm exec tsx app/cli.ts info sample.torrent
 
 # discover peers from tracker
-pnpm dev peers sample.torrent
+pnpm exec tsx app/cli.ts peers sample.torrent
 
 # perform peer handshake with tracker
-pnpm dev handshake sample.torrent <peer_ip>:<peer_port>
+pnpm exec tsx app/cli.ts handshake sample.torrent <peer_ip>:<peer_port>
 
-# downlaod a piece from tracker
-pnpm dev downlaod_piece -o /tmp/test-piece sample.torrent <piece_index>
+# download a piece from tracker
+pnpm exec tsx app/cli.ts download_piece -o /tmp/test-piece sample.torrent <piece_index>
 
 # download a complete file from tracker
-pnpm dev download -o /tmp/out.test sample.torrent
+pnpm exec tsx app/cli.ts download -o /tmp/out.test sample.torrent
 #+end_src
 
 ** Development
 #+begin_src bash
 # run application in cli mode
-pnpm dev <cmd>
+pnpm exec tsx app/cli.ts <cmd>
 
 # run the complete test suite
 npm test
 #+end_src
 
 ** Project Structure
-- ~app/main.ts~  - Entry point
+- ~app/main.ts~  - TUI entry point
+- ~app/cli.ts~   - CLI entry point
 - ~app/cmds/~    - CLI commands
 - ~app/core/~    - Core torrent logic
 - ~app/utils/~   - Utilities (bencode, buffer)
