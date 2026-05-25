@@ -1,16 +1,13 @@
 import type {
   FileDownloadOptions,
+  PieceChunk,
   PieceDownloadOptions,
   TorrentInfoSummary,
   TorrentMeta,
 } from "@/engine/types";
 import { parseTorrent, getTorrentSummary } from "@/engine/torrent";
 import { fetchPeers, handshakeWithPeer } from "@/engine/peers";
-import {
-  downloadPiece,
-  downloadPieceToFile,
-  downloadFileToPath,
-} from "@/engine/download";
+import { downloadPiece, downloadFilePieces } from "@/engine/download";
 
 export type Engine = {
   parseTorrent: (torrentPath: string) => TorrentMeta;
@@ -21,10 +18,9 @@ export type Engine = {
     peerAddress: string,
   ) => Promise<string>;
   downloadPiece: (options: PieceDownloadOptions) => Promise<Buffer>;
-  downloadPieceToFile: (
-    options: PieceDownloadOptions & { outputPath: string },
-  ) => Promise<void>;
-  downloadFileToPath: (options: FileDownloadOptions) => Promise<void>;
+  downloadFilePieces: (
+    options: FileDownloadOptions,
+  ) => AsyncGenerator<PieceChunk, void>;
 };
 
 export const engine: Engine = {
@@ -33,6 +29,5 @@ export const engine: Engine = {
   fetchPeers,
   handshakeWithPeer,
   downloadPiece,
-  downloadPieceToFile,
-  downloadFileToPath,
+  downloadFilePieces,
 };

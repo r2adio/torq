@@ -1,4 +1,3 @@
-import fs from "fs";
 import crypto from "crypto";
 import net from "net";
 import { getTorrentInfo } from "@/core/torrent.service";
@@ -10,7 +9,11 @@ import {
   parsePieceMessage,
   MESSAGE_TYPES,
 } from "@/core/message.service";
-import type { FileDownloadOptions, PieceDownloadOptions } from "@/engine/types";
+import type {
+  FileDownloadOptions,
+  PieceChunk,
+  PieceDownloadOptions,
+} from "@/engine/types";
 
 const PROTOCOL_STRING = "BitTorrent protocol";
 const PROTOCOL_STRING_LENGTH = 19;
@@ -340,6 +343,7 @@ async function downloadPieceFromPeers(
   );
 }
 
+// returns a Buffer (as before)
 export const downloadPiece = async (
   options: PieceDownloadOptions,
 ): Promise<Buffer> => {
@@ -351,17 +355,11 @@ export const downloadPiece = async (
   return downloadPieceFromPeers(pieceIndex, peers, torrentContext);
 };
 
-export const downloadPieceToFile = async (
-  options: PieceDownloadOptions & { outputPath: string },
-): Promise<void> => {
-  const pieceData = await downloadPiece(options);
-  fs.writeFileSync(options.outputPath, pieceData);
-};
-
-export const downloadFileToPath = async (
+// uses async generator yielding {index, data}
+export const downloadFilePieces = async function* (
   options: FileDownloadOptions,
-): Promise<void> => {
-  const { torrentPath, outputPath } = options;
+): AsyncGenerator<PieceChunk, void> {
+  const { torrentPath } = options;
   const torrentContext = prepareTorrentDownloadContext(torrentPath);
   const totalPieces = torrentContext.pieceHash.length;
   if (totalPieces === 0) throw new Error("Torrent contains no pieces");
@@ -369,17 +367,12 @@ export const downloadFileToPath = async (
   const peers = options.peers ?? (await getPeers(torrentPath));
   if (peers.length === 0) throw new Error("No peers available for download");
 
-  const outputFd = fs.openSync(outputPath, "w");
-  try {
-    for (let pieceIndex = 0; pieceIndex < totalPieces; pieceIndex++) {
-      const pieceData = await downloadPieceFromPeers(
-        pieceIndex,
-        peers,
-        torrentContext,
-      );
-      fs.writeSync(outputFd, pieceData);
-    }
-  } finally {
-    fs.closeSync(outputFd);
+  for (let pieceIndex = 0; pieceIndex < totalPieces; pieceIndex++) {
+    const data = await downloadPieceFromPeers(
+      pieceIndex,
+      peers,
+      torrentContext,
+    );
+    yield { index: pieceIndex, data };
   }
 };

@@ -1,3 +1,4 @@
+import fs from "fs";
 import { engine } from "@/engine";
 
 export const download_piece = async () => {
@@ -26,12 +27,12 @@ export const download_piece = async () => {
 
     console.log(`Found ${peers.length} peers. Attempting download...`);
 
-    await engine.downloadPieceToFile({
+    const pieceData = await engine.downloadPiece({
       torrentPath,
       pieceIndex,
-      outputPath,
       peers,
     });
+    fs.writeFileSync(outputPath, pieceData);
     console.log("Piece downloaded and verified successfully!");
     console.log(`Piece ${pieceIndex} saved to ${outputPath}`);
   } catch (error: any) {
@@ -61,7 +62,17 @@ export const download = async () => {
       `Found ${peers.length} peers. Downloading pieces sequentially...`,
     );
 
-    await engine.downloadFileToPath({ torrentPath, outputPath, peers });
+    const outputFd = fs.openSync(outputPath, "w");
+    try {
+      for await (const piece of engine.downloadFilePieces({
+        torrentPath,
+        peers,
+      })) {
+        fs.writeSync(outputFd, piece.data);
+      }
+    } finally {
+      fs.closeSync(outputFd);
+    }
     console.log(`Download complete. File saved to ${outputPath}`);
   } catch (error: any) {
     console.error("Error downloading file:", error.message);

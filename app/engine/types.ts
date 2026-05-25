@@ -28,6 +28,10 @@ export type PieceDownloadOptions = {
 
 export type FileDownloadOptions = {
   torrentPath: string;
-  outputPath: string;
   peers?: string[];
+};
+
+export type PieceChunk = {
+  index: number;
+  data: Buffer;
 };
