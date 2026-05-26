@@ -5,12 +5,23 @@ import type {
   TorrentInfoSummary,
   TorrentMeta,
 } from "@/engine/types";
-import { parseTorrent, getTorrentSummary } from "@/engine/torrent";
+import {
+  parseTorrent,
+  getTorrentSummary,
+  tryParseTorrent,
+  validateTorrentMeta,
+} from "@/engine/torrent";
 import { fetchPeers, handshakeWithPeer } from "@/engine/peers";
 import { downloadPiece, downloadFilePieces } from "@/engine/download";
 
 export type Engine = {
   parseTorrent: (torrentPath: string) => TorrentMeta;
+  tryParseTorrent: (torrentPath: string) =>
+    | { ok: true; value: TorrentMeta }
+    | { ok: false; error: string };
+  validateTorrentMeta: (value: unknown) =>
+    | { ok: true; value: TorrentMeta }
+    | { ok: false; error: string };
   getTorrentSummary: (torrentPath: string) => TorrentInfoSummary;
   fetchPeers: (torrentPath: string) => Promise<string[]>;
   handshakeWithPeer: (
@@ -25,6 +36,8 @@ export type Engine = {
 
 export const engine: Engine = {
   parseTorrent,
+  tryParseTorrent,
+  validateTorrentMeta,
   getTorrentSummary,
   fetchPeers,
   handshakeWithPeer,
