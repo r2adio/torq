@@ -6,10 +6,63 @@ import { ActivityPanel } from "@/ui/components/ActivityPanel";
 import { QuickActions } from "@/ui/components/QuickActions";
 import { StatsCard } from "@/ui/components/StatsCard";
 import { HomeScreen } from "@/ui/screens/HomeScreen";
+import { appRuntime } from "@/runtime";
 
 const app = createNodeApp({
   initialState: createInitialState(),
 });
+
+const runtime = appRuntime.get();
+
+const torrentPath = process.argv[2] ?? null;
+if (torrentPath) {
+  app.update((state) => ({
+    ...state,
+    torrentPath,
+  }));
+
+  runtime
+    .engine
+    .fetchPeers(torrentPath)
+    .then((peers) => {
+      app.update((state) => ({
+        ...state,
+        stats: state.stats.map((stat) =>
+          stat.title === "Peers"
+            ? {
+                ...stat,
+                value: String(peers.length),
+                detail: "Tracker",
+              }
+            : stat,
+        ),
+        peersCount: peers.length,
+      }));
+    })
+    .catch((error: any) => {
+      app.update((state) => ({
+        ...state,
+        stats: state.stats.map((stat) =>
+          stat.title === "Peers"
+            ? {
+                ...stat,
+                value: "--",
+                detail: "Error",
+              }
+            : stat,
+        ),
+        activity: [
+          {
+            id: `peers-error-${Date.now()}`,
+            title: "Peer fetch failed",
+            description: error.message ?? "Unable to reach tracker",
+            time: "Just now",
+          },
+          ...state.activity,
+        ],
+      }));
+    });
+}
 
 app.view((state) => (
   <Column gap={1} pb={1}>
@@ -25,11 +78,17 @@ app.view((state) => (
           <StatsCard stats={state.stats} />
           <ActivityPanel entries={state.activity} />
         </Row>
-        <HomeScreen greeting={state.greeting} />
+        <HomeScreen greeting={state.greeting} torrentPath={state.torrentPath} />
       </Column>
     </Row>
     <StatusBar
-      left={[<Text key="status">Ready</Text>]}
+      left={[
+        <Text key="status">
+          {state.peersCount === null
+            ? "Ready"
+            : `Peers: ${state.peersCount}`}
+        </Text>,
+      ]}
       right={[<Text key="hint">Press q to quit</Text>]}
     />
   </Column>

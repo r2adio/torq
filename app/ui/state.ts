@@ -22,14 +22,16 @@ export type UiState = {
   stats: UiStats[];
   activity: UiActivity[];
   actions: UiAction[];
+  torrentPath: string | null;
+  peersCount: number | null;
 };
 
 export const createInitialState = (): UiState => ({
   greeting: "Welcome to Torq",
   stats: [
-    { title: "Sessions", value: "3", detail: "Active" },
-    { title: "Tasks", value: "12", detail: "Queued" },
-    { title: "Latency", value: "42ms", detail: "Average" },
+    { title: "Sessions", value: "1", detail: "Runtime" },
+    { title: "Peers", value: "--", detail: "Unknown" },
+    { title: "Latency", value: "--", detail: "Tracker" },
   ],
   activity: [
     {
@@ -50,4 +52,6 @@ export const createInitialState = (): UiState => ({
     { id: "toggle", label: "Toggle Mode", hint: "m" },
     { id: "help", label: "Help", hint: "?" },
   ],
+  torrentPath: null,
+  peersCount: null,
 });

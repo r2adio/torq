@@ -1,5 +1,4 @@
 import "@/ui";
-import { createEngineRuntime } from "@/engine/runtime";
+import { appRuntime } from "@/runtime";
 
-const runtime = createEngineRuntime();
-runtime.start();
+appRuntime.get().start();
