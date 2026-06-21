@@ -1,5 +1,7 @@
 {
   "name": "torq",
+  "version": "0.1.0",
+  "description": "bittorrent client node-powered",
   "module": "src/index.ts",
   "type": "module",
   "private": true,
@@ -9,15 +11,15 @@
     "lint": "pnpx @biomejs/biome check"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.15",
+    "@biomejs/biome": "^2.5.1",
     "@types/bencode": "^2.0.4",
-    "@types/node": "^25.9.1",
-    "tsx": "^4.22.3",
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   },
   "dependencies": {
-    "@rezi-ui/core": "0.1.0-alpha.72",
-    "@rezi-ui/jsx": "0.1.0-alpha.72",
-    "@rezi-ui/node": "0.1.0-alpha.72"
+    "@rezi-ui/core": "0.1.0-beta.2",
+    "@rezi-ui/jsx": "0.1.0-beta.2",
+    "@rezi-ui/node": "0.1.0-beta.2"
   }
 }
