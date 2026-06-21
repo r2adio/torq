@@ -28,8 +28,7 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
 
-    "baseUrl": ".",
-    "paths": { "@/*": ["./app/*"] },
+    "paths": { "@/*": ["./app/*"] }
   },
   "include": ["app/**/*.ts", "app/**/*.tsx"]
 }

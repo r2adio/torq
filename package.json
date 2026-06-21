@@ -6,9 +6,12 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "tsx watch app/main.ts",
+    "start": "tsx app/index.ts",
+    "dev": "tsx watch app/index.ts",
     "test": "node --test",
-    "lint": "pnpx @biomejs/biome check"
+    "typecheck": "tsc --noEmit",
+    "check": "pnpx @biomejs/biome check",
+    "check:fix": "biome check --write --unsafe"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.1",
