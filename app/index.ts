@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { parseCliArgs } from "./cli/parse";
 
 async function getVersion(): Promise<string> {
@@ -5,7 +6,7 @@ async function getVersion(): Promise<string> {
   return pkg.default.version as string;
 }
 
-async function outHelp(): Promise<void> {
+async function printHelp(): Promise<void> {
   const version = await getVersion();
   console.log(`torrent-tui ${version}
 
@@ -33,6 +34,18 @@ Options:
   --json                              Machine-readable output for --info`);
 }
 
+function validateTorrentArg(arg: string): string {
+  if (!arg.toLowerCase().endsWith(".torrent")) {
+    console.error(`Error: '${arg}' is not a .torrent file`);
+    process.exit(1);
+  }
+  if (!existsSync(arg)) {
+    console.error();
+    process.exit(1);
+  }
+  return arg;
+}
+
 async function main() {
   const command = (() => {
     try {
@@ -44,19 +57,34 @@ async function main() {
   })();
 
   if (command.action === "help") {
-    await outHelp();
+    await printHelp();
     return;
   }
   if (command.action === "version") {
     console.log(await getVersion());
     return;
   }
-  // TODO: add info download info
+  // TODO: add verify, handshake, download, info actions
+  if (command.input) {
+    const torrentPath = validateTorrentArg(command.input);
+    if (command.action === "verify") {
+      return;
+    }
+    if (command.action === "handshake") {
+      return;
+    }
+    if (command.action === "download") {
+      return;
+    }
+    if (command.action === "info") {
+      return;
+    }
+  }
   // TODO: add entry point for app (tui)
 }
 
 main().catch((err: unknown) => {
   if (err) return;
-  process.exitCode = 1;
   console.error(`Error: ${err instanceof Error ? err.message : err}`);
+  process.exitCode = 1;
 });
