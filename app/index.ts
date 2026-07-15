@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { parseCliArgs } from "./cli/parse";
+import { parseCliArgs } from "@/cli/parse.ts";
 
 async function getVersion(): Promise<string> {
   const pkg = await import("../package.json");

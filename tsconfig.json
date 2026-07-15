@@ -5,13 +5,11 @@
     "target": "ESNext",
     "module": "NodeNext",
     "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "jsxImportSource": "@rezi-ui/jsx",
     "allowJs": true,
     "types": ["node"],
 
     // Bundler mode
-    "moduleResolution": "bundler",
+    "moduleResolution": "NodeNext",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
@@ -30,5 +28,5 @@
 
     "paths": { "@/*": ["./app/*"] }
   },
-  "include": ["app/**/*.ts", "app/**/*.tsx"]
+  "include": [ "**/*.ts" ]
 }
