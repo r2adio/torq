@@ -21,9 +21,6 @@ importers:
       '@biomejs/biome':
         specifier: ^2.5.1
         version: 2.5.1
-      '@types/bencode':
-        specifier: ^2.0.4
-        version: 2.0.4
       '@types/node':
         specifier: ^26.0.1
         version: 26.0.1
@@ -265,9 +262,6 @@ packages:
     resolution: {integrity: sha512-0Jz3M+gJgeg48C8bAR6kLroBYMjdelxU6BAStKN2t3s4saq4JSaaCh1OxZFZUeNTaD9hfapFqx4p4Uc9vQ85TA==}
     engines: {bun: '>=1.3.0', node: '>=18'}
 
-  '@types/bencode@2.0.4':
-    resolution: {integrity: sha512-sirDu3HUSG7jZMlhTDvCzSFiPR4lkUYBQA75CoMi6DEf2alFZWJWtHgfjBbb9PachPZhPMB1IlH09deyMNBipQ==}
-
   '@types/node@26.0.1':
     resolution: {integrity: sha512-fc3KiUoBt6kie0N9bIW3E47vZsuaMf0PM2AaUpLCLT0s/LvX1nxAim6Fc049cNxODPpGm6qRAuUOB86SkRuPQw==}
 
@@ -432,10 +426,6 @@ snapshots:
       '@rezi-ui/native': 0.1.0-beta.2
       '@xterm/headless': 6.0.0
       node-pty: 1.1.0
-
-  '@types/bencode@2.0.4':
-    dependencies:
-      '@types/node': 26.0.1
 
   '@types/node@26.0.1':
     dependencies:
