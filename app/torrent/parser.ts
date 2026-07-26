@@ -20,18 +20,14 @@ export function parseIntB(data: Uint8Array, i: number): [number, number] {
 }
 
 // <len>:<bytes> -> Uint8Array (raw binary string)
-export function parseByteString(
-  data: Uint8Array,
-  i: number,
-): [Uint8Array, number] {
+export function parseByteString(data: Uint8Array, i: number): [Uint8Array, number] {
   let j = i;
   while (j < data.length && data[j] !== 58) j++; // ascii code of `:`
   if (j >= data.length) throw new Error("Invalid string: missing separator");
   const len = Number.parseInt(TEXT_DECODER.decode(data.slice(i, j)), 10);
   if (len < 0) throw new Error("Invalid string: negative length");
   j++;
-  if (j + len > data.length)
-    throw new Error("Invalid string: length exceeds data");
+  if (j + len > data.length) throw new Error("Invalid string: length exceeds data");
   return [data.slice(j, j + len), j + len];
 }
 
@@ -42,10 +38,7 @@ export function parseStringB(data: Uint8Array, i: number): [string, number] {
 }
 
 // l<items>e -> BencodeValue[]
-export function parseListB(
-  data: Uint8Array,
-  i: number,
-): [BencodeValue[], number] {
+export function parseListB(data: Uint8Array, i: number): [BencodeValue[], number] {
   if (data[i] !== 108) throw new Error("Invalid list"); // ascii code of `l`
   i++;
   const arr: BencodeValue[] = [];
@@ -59,10 +52,7 @@ export function parseListB(
 }
 
 // d<key-value>e -> { [key: string]: BencodeValue }
-export function parseDictB(
-  data: Uint8Array,
-  i: number,
-): [{ [key: string]: BencodeValue }, number] {
+export function parseDictB(data: Uint8Array, i: number): [{ [key: string]: BencodeValue }, number] {
   if (data[i] !== 100) throw new Error("Invalid dictionary"); // ascii code of `d`
   i++;
   const dict: { [key: string]: BencodeValue } = {};
@@ -151,9 +141,7 @@ export function extractInfoBytes(data: Uint8Array): Uint8Array {
 export function encode(value: BencodeValue): Uint8Array {
   if (typeof value === "number") {
     if (!Number.isFinite(value))
-      throw new Error(
-        "Cannot encode non-finite numbers (NaN, Infinity, -Infinity)",
-      );
+      throw new Error("Cannot encode non-finite numbers (NaN, Infinity, -Infinity)");
     return TEXT_ENCODER.encode(`i${value}e`);
   }
   if (typeof value === "string") {

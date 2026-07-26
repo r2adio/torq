@@ -26,10 +26,7 @@ export class TorrentMetadata {
   readonly webSeeds: string[];
   readonly isMultiFile: boolean;
 
-  constructor(
-    decoded: { [key: string]: BencodeValue },
-    rawTorrentBytes: Uint8Array,
-  ) {
+  constructor(decoded: { [key: string]: BencodeValue }, rawTorrentBytes: Uint8Array) {
     const info = decoded.info;
     if (
       typeof info !== "object" ||
@@ -47,8 +44,7 @@ export class TorrentMetadata {
     if (!(nameRaw instanceof Uint8Array) && typeof nameRaw !== "string") {
       throw new Error("Missing name in info dict");
     }
-    this.name =
-      nameRaw instanceof Uint8Array ? TEXT_DECODER.decode(nameRaw) : nameRaw;
+    this.name = nameRaw instanceof Uint8Array ? TEXT_DECODER.decode(nameRaw) : nameRaw;
 
     // piece length
     const pl = infoDict["piece length"];
@@ -64,9 +60,8 @@ export class TorrentMetadata {
       throw new Error("pieces length is not a multiple of 20");
     }
     this.pieceHashes = [];
-    for (let i = 0; i < piecesRaw.length; i += 20) {
+    for (let i = 0; i < piecesRaw.length; i += 20)
       this.pieceHashes.push(piecesRaw.slice(i, i + 20));
-    }
     this.pieceCount = this.pieceHashes.length;
 
     // file list
@@ -180,16 +175,10 @@ export class TorrentMetadata {
   ): Array<{ file: FileInfo; fileOffset: number; length: number }> {
     const pieceStart = pieceIndex * this.pieceLength;
     const isLastPiece = pieceIndex === this.pieceCount - 1;
-    const pieceLen = isLastPiece
-      ? this.totalSize - pieceStart
-      : this.pieceLength;
+    const pieceLen = isLastPiece ? this.totalSize - pieceStart : this.pieceLength;
     const pieceEnd = pieceStart + pieceLen;
 
-    const ranges: Array<{
-      file: FileInfo;
-      fileOffset: number;
-      length: number;
-    }> = [];
+    const ranges: Array<{ file: FileInfo; fileOffset: number; length: number }> = [];
 
     for (const file of this.storageFiles) {
       const fileEnd = file.offset + file.length;
@@ -202,17 +191,12 @@ export class TorrentMetadata {
         length: overlapEnd - overlapStart,
       });
     }
-
     return ranges;
   }
 
   logSummary(): void {
-    const httpTrackers = this.announceList
-      .flat()
-      .filter((u) => u.startsWith("http")).length;
-    const udpTrackers = this.announceList
-      .flat()
-      .filter((u) => u.startsWith("udp")).length;
+    const httpTrackers = this.announceList.flat().filter((u) => u.startsWith("http")).length;
+    const udpTrackers = this.announceList.flat().filter((u) => u.startsWith("udp")).length;
     const trackerParts = [
       httpTrackers > 0 ? `${httpTrackers} HTTP` : "",
       udpTrackers > 0 ? `${udpTrackers} UDP` : "",
@@ -230,8 +214,7 @@ export class TorrentMetadata {
 function isPaddingFile(fileDict: { [key: string]: BencodeValue }): boolean {
   const attr = fileDict.attr;
   if (typeof attr === "string") return attr.includes("p");
-  if (attr instanceof Uint8Array)
-    return TEXT_DECODER.decode(attr).includes("p");
+  if (attr instanceof Uint8Array) return TEXT_DECODER.decode(attr).includes("p");
   return false;
 }
 
@@ -256,9 +239,7 @@ function parseWebSeeds(value: BencodeValue | undefined): string[] {
   return urls;
 }
 
-function parseDhtNodes(
-  value: BencodeValue | undefined,
-): Array<{ ip: string; port: number }> {
+function parseDhtNodes(value: BencodeValue | undefined): Array<{ ip: string; port: number }> {
   if (!Array.isArray(value)) return [];
   const nodes: Array<{ ip: string; port: number }> = [];
   for (const entry of value) {

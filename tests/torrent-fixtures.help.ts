@@ -1,5 +1,5 @@
 import { TorrentMetadata } from "@/torrent/metadata.ts";
-import { decode, encode, type BencodeValue } from "@/torrent/parser.ts";
+import { type BencodeValue, decode, encode } from "@/torrent/parser.ts";
 import { bytes, pieceHashBytes } from "./bytes.help.ts";
 
 export interface TorrentFixture {
@@ -62,15 +62,9 @@ function buildTorrentDictionary(
     announce: options.announce ?? "http://tracker.example/announce",
     info,
   };
-  if (options.announceList) {
-    torrent["announce-list"] = options.announceList;
-  }
-  if (options.nodes) {
-    torrent.nodes = options.nodes;
-  }
-  if (options.private) {
-    info.private = 1;
-  }
+  if (options.announceList) torrent["announce-list"] = options.announceList;
+  if (options.nodes) torrent.nodes = options.nodes;
+  if (options.private) info.private = 1;
   if (options.webSeeds) {
     if (options.webSeeds.length === 1 && options.webSeeds[0]) {
       torrent["url-list"] = options.webSeeds[0];

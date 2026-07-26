@@ -66,19 +66,11 @@ async function main() {
   }
   // TODO: add verify, handshake, download, info actions
   if (command.input) {
-    const torrentPath = validateTorrentArg(command.input);
-    if (command.action === "verify") {
-      return;
-    }
-    if (command.action === "handshake") {
-      return;
-    }
-    if (command.action === "download") {
-      return;
-    }
-    if (command.action === "info") {
-      return;
-    }
+    const _torrentPath = validateTorrentArg(command.input);
+    if (command.action === "verify") return;
+    if (command.action === "handshake") return;
+    if (command.action === "download") return;
+    if (command.action === "info") return;
   }
   // TODO: add entry point for app (tui)
 }

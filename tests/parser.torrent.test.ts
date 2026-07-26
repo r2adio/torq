@@ -1,7 +1,7 @@
-import { describe, it } from "node:test";
 import assert from "node:assert";
-import { decode, encode, extractInfoBytes } from "@/torrent/parser.ts";
+import { describe, it } from "node:test";
 import type { BencodeValue } from "@/torrent/parser.ts";
+import { decode, encode, extractInfoBytes } from "@/torrent/parser.ts";
 import { singleFileTorrentFixture } from "./torrent-fixtures.help.ts";
 
 function bytes(value: string): Uint8Array {
@@ -24,30 +24,16 @@ describe("bencode parser", () => {
     assert.deepStrictEqual(decode(bytes("li1e3:twoe")), [1, bytes("two")]);
     assert.deepStrictEqual(decode(bytes("le")), []);
 
-    assert.deepStrictEqual(decode(bytes("d1:ali1ei2ee1:bi3ee")), {
-      a: [1, 2],
-      b: 3,
-    });
+    assert.deepStrictEqual(decode(bytes("d1:ali1ei2ee1:bi3ee")), { a: [1, 2], b: 3 });
     assert.deepStrictEqual(decode(bytes("de")), {});
   });
 
   it("round trips bencode values with sorted dictionary keys", () => {
-    const value: { [key: string]: BencodeValue } = {
-      z: 1,
-      a: "x",
-      list: [bytes("raw"), -2],
-    };
+    const value: { [key: string]: BencodeValue } = { z: 1, a: "x", list: [bytes("raw"), -2] };
     const encoded = encode(value);
 
-    assert.strictEqual(
-      Buffer.from(encoded).toString(),
-      "d1:a1:x4:listl3:rawi-2ee1:zi1ee",
-    );
-    assert.deepStrictEqual(decode(encoded), {
-      a: bytes("x"),
-      list: [bytes("raw"), -2],
-      z: 1,
-    });
+    assert.strictEqual(Buffer.from(encoded).toString(), "d1:a1:x4:listl3:rawi-2ee1:zi1ee");
+    assert.deepStrictEqual(decode(encoded), { a: bytes("x"), list: [bytes("raw"), -2], z: 1 });
   });
 
   it("handles undefined values and non-finite numbers", () => {
@@ -66,10 +52,7 @@ describe("bencode parser", () => {
     assert.throws(() => decode(bytes("x")), /Invalid bencode type/);
     assert.throws(() => decode(bytes("i420")), /Unterminated integer/);
     assert.throws(() => decode(bytes("i420ee")), /Extra data/);
-    assert.throws(
-      () => decode(bytes("6:xyz")),
-      /Invalid string: length exceeds data/,
-    );
+    assert.throws(() => decode(bytes("6:xyz")), /Invalid string: length exceeds data/);
   });
 
   it("extracts raw info bytes without depending on top-level key order", () => {
