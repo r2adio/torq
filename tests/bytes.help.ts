@@ -26,10 +26,7 @@ export function hex(data: Uint8Array): string {
   return Buffer.from(data).toString("hex");
 }
 
-export function splitPieces(
-  content: Uint8Array,
-  pieceLength: number,
-): Uint8Array[] {
+export function splitPieces(content: Uint8Array, pieceLength: number): Uint8Array[] {
   const pieces: Uint8Array[] = [];
   for (let offset = 0; offset < content.length; offset += pieceLength) {
     pieces.push(content.slice(offset, offset + pieceLength));
@@ -37,11 +34,6 @@ export function splitPieces(
   return pieces;
 }
 
-export function pieceHashBytes(
-  content: Uint8Array,
-  pieceLength: number,
-): Uint8Array {
-  return concatBytes(
-    splitPieces(content, pieceLength).map((piece) => sha1(piece)),
-  );
+export function pieceHashBytes(content: Uint8Array, pieceLength: number): Uint8Array {
+  return concatBytes(splitPieces(content, pieceLength).map((piece) => sha1(piece)));
 }

@@ -1,10 +1,14 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
-import { decode, encode } from "@/torrent/parser.ts";
+import { decode, encode, extractInfoBytes } from "@/torrent/parser.ts";
 import type { BencodeValue } from "@/torrent/parser.ts";
+import { singleFileTorrentFixture } from "./torrent-fixtures.help.ts";
 
 function bytes(value: string): Uint8Array {
   return new TextEncoder().encode(value);
+}
+function hex(data: Uint8Array): string {
+  return Buffer.from(data).toString("hex");
 }
 
 describe("bencode parser", () => {
@@ -60,11 +64,17 @@ describe("bencode parser", () => {
 
   it("rejects malformed bencode", () => {
     assert.throws(() => decode(bytes("x")), /Invalid bencode type/);
-    assert.throws(() => decode(bytes("i12")), /Unterminated integer/);
+    assert.throws(() => decode(bytes("i420")), /Unterminated integer/);
+    assert.throws(() => decode(bytes("i420ee")), /Extra data/);
     assert.throws(
-      () => decode(bytes("4:abc")),
+      () => decode(bytes("6:xyz")),
       /Invalid string: length exceeds data/,
     );
-    assert.throws(() => decode(bytes("i1ee")), /Extra data/);
+  });
+
+  it("extracts raw info bytes without depending on top-level key order", () => {
+    const fixtures = singleFileTorrentFixture();
+    assert.deepStrictEqual(extractInfoBytes(fixtures.raw), encode(fixtures.info));
+    assert.strictEqual(hex(fixtures.metadata.infoHash), "f0e16d3ed965f1025c51c11e78e664cda769d6a0");
   });
 });

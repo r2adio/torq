@@ -94,6 +94,59 @@ export function decode(data: Uint8Array): BencodeValue {
   return result;
 }
 
+// skips over a bencode value and returns index
+// used to extract raw byte ranges w/o decoding
+function skipBValue(data: Uint8Array, i: number): number {
+  const byte = data[i];
+  if (byte === undefined) throw new Error(`Unexpected end at ${i}`);
+  if (byte === 105) {
+    // integer: i<digits>e
+    while (i < data.length && data[i] !== 101) i++;
+    return i + 1;
+  }
+  if (byte === 108) {
+    // list: l<items>e
+    i++;
+    while (i < data.length && data[i] !== 101) i = skipBValue(data, i);
+    return i + 1;
+  }
+  if (byte === 100) {
+    // dict: d<key><value>...e
+    i++;
+    while (i < data.length && data[i] !== 101) {
+      i = skipBValue(data, i); // key
+      i = skipBValue(data, i); // value
+    }
+    return i + 1;
+  }
+  if (byte >= 48 && byte <= 57) {
+    // string: <len>:<bytes>
+    let j = i;
+    while (j < data.length && data[j] !== 58) j++;
+    const len = Number.parseInt(TEXT_DECODER.decode(data.slice(i, j)), 10);
+    return j + 1 + len;
+  }
+  throw new Error(`Unknown bencode type at ${i}: ${byte}`);
+}
+
+// extract the bencoded 'info' section, w/o any decode or re-encode
+// bitTorrent Enhancement Proposal (BEP) 3 requires hashing original bytes
+// SHA-1 info_hash must be computed from these exact bytes
+export function extractInfoBytes(data: Uint8Array): Uint8Array {
+  if (data[0] !== 100) throw new Error("Torrent file is not a bencode dict");
+  let i = 1;
+  while (i < data.length && data[i] !== 101) {
+    const [key, afterKey] = parseStringB(data, i);
+    const valueStart = afterKey;
+    if (key === "info") {
+      const valueEnd = skipBValue(data, valueStart);
+      return data.slice(valueStart, valueEnd);
+    }
+    i = skipBValue(data, valueStart);
+  }
+  throw new Error("No 'info' key found in torrent file");
+}
+
 // encode back to original
 export function encode(value: BencodeValue): Uint8Array {
   if (typeof value === "number") {
