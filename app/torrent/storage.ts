@@ -101,9 +101,7 @@ export class StorageManager {
 
   readPieceSync(pieceIndex: number): Buffer {
     const data = this.readPieceMaybeSync(pieceIndex, false);
-    if (!data) {
-      throw new Error(`Unable to read piece ${pieceIndex}`);
-    }
+    if (!data) throw new Error(`Unable to read piece ${pieceIndex}`);
     return data;
   }
 
@@ -140,9 +138,7 @@ export class StorageManager {
           throw new Error(`Short read: ${fullPath}`);
         }
       } finally {
-        if (owned) {
-          closeSync(fd);
-        }
+        if (owned) closeSync(fd);
       }
       written += length;
     }
@@ -279,9 +275,7 @@ export class StorageManager {
 
   get downloadedBytes(): number {
     let total = 0;
-    for (const pieceIndex of this.downloadedPieces) {
-      total += this.pieceLengthForIndex(pieceIndex);
-    }
+    for (const pieceIndex of this.downloadedPieces) total += this.pieceLengthForIndex(pieceIndex);
     return total;
   }
 
@@ -306,14 +300,10 @@ export class StorageManager {
     fullPath: string,
     readHandles?: ReadHandleMap,
   ): { fd: number; owned: boolean } {
-    if (!readHandles) {
-      return { fd: openSync(fullPath, "r"), owned: true };
-    }
+    if (!readHandles) return { fd: openSync(fullPath, "r"), owned: true };
 
     const cached = readHandles.get(fullPath);
-    if (cached !== undefined) {
-      return { fd: cached, owned: false };
-    }
+    if (cached !== undefined) return { fd: cached, owned: false };
 
     const fd = openSync(fullPath, "r");
     readHandles.set(fullPath, fd);
@@ -321,9 +311,7 @@ export class StorageManager {
   }
 
   private closeReadHandles(readHandles: ReadHandleMap): void {
-    for (const fd of readHandles.values()) {
-      closeSync(fd);
-    }
+    for (const fd of readHandles.values()) closeSync(fd);
     readHandles.clear();
   }
 
@@ -440,9 +428,7 @@ export class StorageManager {
 }
 
 function isAllZero(buf: Uint8Array): boolean {
-  for (let i = 0; i < buf.length; i++) {
-    if (buf[i] !== 0) return false;
-  }
+  for (let i = 0; i < buf.length; i++) if (buf[i] !== 0) return false;
   return true;
 }
 

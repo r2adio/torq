@@ -18,8 +18,7 @@ export function concatBytes(parts: Uint8Array[]): Uint8Array {
 }
 
 export function sha1(data: Uint8Array): Uint8Array {
-  // return new SHA1().update(data).digest() as unknown as Uint8Array;
-  return new Uint8Array(createHash("sha1").update(data).digest());
+  return createHash("sha1").update(data).digest();
 }
 
 export function hex(data: Uint8Array): string {
